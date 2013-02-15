@@ -1,0 +1,28 @@
+@mixin gradient($top, $bottom) {
+  background-image: -webkit-gradient(linear, left top, left bottom, from($top), to($bottom));
+  background-image: -webkit-linear-gradient(top, $top, $bottom);
+  background-image:    -moz-linear-gradient(top, $top, $bottom);
+  background-image:         linear-gradient(to bottom, $top, $bottom);
+}
+
+// The graphics in the icon sprite are arrayed vertically in 
+// this order for each icon: hover, selected, default. Not all
+// icons have a selected state.
+@mixin icon() {
+  background-position: 0 ($spritePosition - 50);
+    &:hover {
+        background-position: 0 $spritePosition;
+    }
+  $spritePosition: $spritePosition - 100;
+}
+// Just like icon() but with a selected state.
+@mixin iconWithSelected() {
+  background-position: 0 ($spritePosition - 100);
+    &.is-selected {
+        background-position: 0 ($spritePosition - 50);
+    }
+    &:hover {
+        background-position: 0 $spritePosition;
+    }
+  $spritePosition: $spritePosition - 150;
+}

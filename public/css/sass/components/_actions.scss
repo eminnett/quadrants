@@ -1,0 +1,16 @@
+// The buttons container in the EditTaskView.
+.actions {
+    margin: 10px 0 0 0;
+    .action-wrapper {
+        display: inline-block;
+        margin-right: -3px;
+        width: 33%;
+        text-align: center;
+        &.first {
+            text-align: left;
+        }
+        &.last {
+            text-align: right;
+        }
+    }
+}

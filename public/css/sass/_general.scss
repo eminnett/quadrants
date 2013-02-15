@@ -1,0 +1,14 @@
+// This makes life so much easier!
+* { 
+	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box; 
+}
+
+a {
+    color: $LIGHT_GRAY;
+    text-decoration: none;
+    &:hover, &:active { 
+        color: $CYAN;
+    }
+}

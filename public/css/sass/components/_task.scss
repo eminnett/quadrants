@@ -1,0 +1,84 @@
+// Task HTML structure:
+// <div class="bottom-layer">
+//     <div class="status-options">
+//         <div class="status-icon"></div>
+//     </div>
+//     <div class="actions">
+//         <div class="action button"></div>
+//     </div>
+// </div>
+// <div class="top-layer">
+//     <div class="status">
+//         <div class="status-icon"></div>
+//     </div>
+//     <div class="title"></div>
+//     <div class="drag-affordance"></div>
+// </div>
+//
+// The top-layer renders above the bottom layer 
+// to provide swiping functionaility. 
+.task {
+    cursor: pointer;
+    position: relative;
+    margin: 0 0 10px 0;
+    height: 52px;
+    width: 100%;
+    border-radius: 5px;
+    .top-layer, .bottom-layer {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        border-radius: 5px;
+    }
+    .top-layer {
+        @include gradient($MEDIUM_CYAN, $DARK_CYAN);
+        color: $LIGHT_GRAY;
+        border: 1px solid #000;
+        .status, .title, .drag-affordance{
+            display: inline-block;
+            height: 40px;
+            vertical-align: top;
+            margin: 5px;
+        }
+        .title {
+            padding: 11px 0 0 0;
+        }
+        .drag-affordance {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            @include gradient($DARK_CYAN, $MEDIUM_CYAN);
+        }
+    }
+    .bottom-layer {
+        background: $DARK_GRAY;
+        border: 1px solid #000;
+        .status-options, .actions {
+            height: 40px;
+            position: absolute;
+            width: auto;
+            margin: 5px;
+        }
+        .status-options {
+            left: 0;
+            padding: 0 10px 0 0;
+        }
+        .actions {
+            right: 0;
+            padding: 0 0 0 10px;
+        }
+    }
+    &:hover {
+        .top-layer {
+            color: $CYAN;
+            @include gradient($MEDIUM_GRAY, $DARK_GRAY);
+            .drag-affordance {
+                @include gradient($DARK_GRAY, $MEDIUM_GRAY);
+            }
+        }
+    }
+}

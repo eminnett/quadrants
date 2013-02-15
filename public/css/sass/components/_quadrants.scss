@@ -1,0 +1,41 @@
+// Quadrants HTML structure:
+// <div class="quadrants">
+// 	   <div class="half top">
+// 		   <div class="quadrant left"></div>
+// 		   Divider...
+// 		   <div class="quadrant right"></div>
+// 	   </div>
+// 	   Dividers...
+// 	   <div class="half bottom">
+// 		   <div class="quadrant left"></div>
+// 		   Divider...
+// 		   <div class="quadrant right"></div>
+// 	   </div>
+// </div>
+.quadrants {
+	padding: $HEADER_HEIGHT 0 $FOOTER_HEIGHT 0;
+	height: 100%;
+}
+.half {
+	position: relative;
+	width: 100%;
+	height: 50%;
+}
+.quadrant {
+	position: absolute;
+	width: 50%;
+	height: 100%;
+	&.left {
+		padding-right: $DIVIDER_THICKNESS/2;
+	}
+	&.right {
+		padding-left: $DIVIDER_THICKNESS/2;
+		left: 50%;
+	}
+	.top & {
+		padding-bottom: $DIVIDER_THICKNESS/2;
+	}
+	.bottom & {
+		padding-top: $DIVIDER_THICKNESS/2;
+	}
+}

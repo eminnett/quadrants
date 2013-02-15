@@ -1,0 +1,22 @@
+// This is the only place in the css where !important is permissable.
+// We need to be able to ensure that an element with a hidden state
+// is infact not visible.
+.is-hidden {
+    display: none !important;
+}
+// Ensure interactive elements (lke toggles and buttons) have the 
+// appropriate cursor. 
+.is-interactive {
+    cursor: pointer !important;
+}
+// Given the nature of a drag and drop application, we need to be 
+// able to disable text selection.
+.is-not-selectable {
+    cursor: default;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

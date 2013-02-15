@@ -1,0 +1,24 @@
+// Task-container HTML structure:
+// <div class="task-container">
+//     <div class="scroll-panel">
+//         <div class="task-list">
+// 		       Tasks...
+//         </div>
+//     </div>
+// </div>
+.task-container {
+	height: 100%;
+	width: 100%;
+	margin: 0 0 0.1px 0;
+	.scroll-panel {
+		padding: $LABEL_THICKNESS;
+		padding-bottom: $LABEL_THICKNESS - 10px;
+		height: 100%;
+		width: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+		.task-list {
+			margin: 0 0 0.1px 0;
+		}
+	}
+}

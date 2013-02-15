@@ -1,0 +1,38 @@
+// The labels in the three top and/or left quadrants.
+.quadrant-label {
+	position: absolute;
+	background: #EEE;
+	width: 100%;
+	height: $LABEL_THICKNESS;
+	padding-top: 4px;
+	&.left {
+		width: $LABEL_THICKNESS;
+		height: 100%;
+		& ~ .task-container {
+			padding-left: $LABEL_THICKNESS;
+		}
+	}
+	&.top {
+		width: 100%;
+		height: $LABEL_THICKNESS;
+		padding-left: 5px;
+		& ~ .task-container {
+			padding-top: $LABEL_THICKNESS;
+		}
+	}
+	&.left .text{
+		position: relative;
+		width: 100px;
+		right: 37px;
+		top: 45px;
+		text-align: right;
+		-webkit-transform: rotate(-90deg); 
+		-moz-transform: rotate(-90deg);
+	}
+	.half.top .quadrant.left &.top {
+		padding-left: $LABEL_THICKNESS;
+	}
+	.half.top .quadrant.left &.left {
+		padding-top: $LABEL_THICKNESS;
+	}
+}

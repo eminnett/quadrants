@@ -1,0 +1,73 @@
+// Visually .button and .status-icon are essentially the same except 
+// that a status-icon has a selected state. There is overlap between 
+// the .archive/.unarchive buttons and .archived/.unarchived status-icons.
+.button {
+    color: $LIGHT_GRAY;
+    display: inline-block;
+    height: 40px;
+    min-width: 40px;
+    background: url(/imgs/icon_sprite.png) left top no-repeat;
+    &.has-label {
+        padding: 21px 0 0 42px;
+    }
+    &:hover {
+        color: $CYAN;
+        border-color: #666;
+    }
+    &.add {
+        @include icon();
+    }
+    // .cancel and .delete don't use the mixin as the 
+    // sprite positions are atypical.
+    &.cancel {
+        background-position: 0 -200px;
+        &:hover {
+            background-position: 0 -100px;
+        }
+    }
+    &.delete {
+        background-position: 0 -200px;
+        &:hover {
+            color: $RED;
+            background-position: 0 -150px;
+        }
+    }
+    // Set $spritePosition value to take .cancel 
+    // and .delete into account.
+    $spritePosition: -250px;
+    // .archive/.unarchive are used for buttons where 
+    // .archived/.unarchived are used for status-icons.
+    // .archived/.unarchived are defined here to make 
+    // best use of the iconWithSelected mixin and will 
+    // be included inside the .status-icon declaration 
+    // with an @extend call.
+    &.archive, &.archived {
+        @include iconWithSelected();
+    }
+    &.unarchive, &.unarchived {
+        @include iconWithSelected();
+    }
+    &.save {
+        @include icon();
+    }
+}
+
+.status-icon {
+    @extend .button;
+    &.none {
+        @include iconWithSelected();
+    }
+    &.pending {
+        @include iconWithSelected();
+    }
+    &.started {
+        @include iconWithSelected();
+    }
+    &.complete {
+        @include iconWithSelected();
+    }
+    &.critical {
+        padding-top: 18px;
+        @include iconWithSelected();
+    }
+}

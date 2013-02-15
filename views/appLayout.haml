@@ -1,0 +1,71 @@
+!!! 5
+%html{:lang => "en"}
+    %head
+        %meta{:charset => "utf-8"}
+        %meta{:content => "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible"}
+        %meta{:content => "width=device-width,initial-scale=1", :name => "viewport"}
+        %title
+            Quadrants
+        %link{:rel => "icon", :type => "image/png", :href => "/imgs/favicon.png"}
+        %link{:rel => "stylesheet", :type => "text/css", :href => "/css/quadrants.css"}
+        %script{"data-main" => "js/main", :src => "/js/libs/require.js"}
+    %body.is-not-selectable
+        %header
+            .logo.is-not-selectable
+                Quadrants
+            .filters-wrapper
+                %span.label.is-not-selectable
+                    Filters:
+                .filters
+                    %a.filter.backbone-action{:href => "tasks/toggle-filter/none"}
+                        %span.status-icon.is-interactive.none
+                    %a.filter.backbone-action{:href => "tasks/toggle-filter/pending"}
+                        %span.status-icon.is-interactive.pending
+                    %a.filter.backbone-action{:href => "tasks/toggle-filter/started"}
+                        %span.status-icon.is-interactive.started
+                    %a.filter.backbone-action{:href => "tasks/toggle-filter/complete"}
+                        %span.status-icon.is-interactive.complete
+                    %a.filter.backbone-action{:href => "tasks/toggle-filter/critical"}
+                        %span.status-icon.is-interactive.critical
+                    %a.filter.backbone-action{:href => "tasks/toggle-filter/archived"}
+                        %span.status-icon.is-interactive.archived
+                    %a.filter.backbone-action{:href => "tasks/toggle-filter/unarchived"}
+                        %span.status-icon.is-interactive.unarchived
+            .button.has-label.is-interactive.add
+                New task
+        .quadrants
+            .half.top
+                .quadrant.left{:"data-priority" => "0"}
+                    .quadrant-label.left
+                        .text
+                            Important
+                    .quadrant-label.top
+                        .text
+                            Urgent
+                    = partial :taskContainer
+                .vertical-divider.divider
+                    .drag-affordance.one-dimension
+                .quadrant.right{:"data-priority" => "1"}
+                    .quadrant-label.top
+                        .text
+                            Not&nbsp;Urgent
+                    = partial :taskContainer
+            .horizontal-dividers
+                .horizontal-divider.divider
+                    .drag-affordance.one-dimension
+                #resize-handle.drag-affordance.two-dimensions
+                .horizontal-divider.divider.right
+                    .drag-affordance.one-dimension
+            .half.bottom
+                .quadrant.left{:"data-priority" => "2"}
+                    .quadrant-label.left
+                        .text
+                            Not&nbsp;Important
+                    = partial :taskContainer
+                .vertical-divider.divider
+                    .drag-affordance.one-dimension
+                .quadrant.right{:"data-priority" => "3"}
+                    = partial :taskContainer
+        %footer
+            &copy; 2013 EJM
+        #route{:"data-route" => @route}

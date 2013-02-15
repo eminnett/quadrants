@@ -1,0 +1,70 @@
+// The documnet should occupy the entire window and 
+// not have a scroll bar.
+html, body {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+header, footer {
+	background: #333;
+	color: $LIGHT_GRAY;
+	position: fixed;
+	width: 100%;
+}
+
+// Header HTML structure:
+// <header>
+// 	  <div class="logo"></div>
+// 	  <div class="filters-wrapper">
+// 		  <span class="label"></span>
+// 		  <div class="filters">
+// 			  <a class="filter">
+// 				  <span class="status-icon"></span>
+// 			  </a>
+// 		  </div>
+// 	  </div>
+// 	  <div class="button add"></div>
+// </header>
+header {
+	height: $HEADER_HEIGHT;
+	top: 0;
+	& > div {
+		display: inline-block;
+	}
+	.logo {
+		color: $CYAN;
+		padding: 10px;
+		font-size: 32px;
+		vertical-align: top;
+	}
+	.filters-wrapper {
+		position: relative;
+		top: 5px;
+		height: 40px;
+		text-align: center;
+		margin: 0 0 0 20px;
+		.label {
+			position: relative;
+			top: -5px;
+		}
+		.filters {
+			display: inline-block;
+			position: relative;
+			height: 40px;
+		}
+	}
+	.button.add {
+		position: absolute;
+		top: 5px;
+		right: 10px;
+	}
+}
+
+footer {
+	height: $FOOTER_HEIGHT;
+	bottom: 0;
+	font-size: 12px;
+	text-align: right;
+	padding: 4px;
+}
