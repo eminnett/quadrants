@@ -6,6 +6,7 @@
 // ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
 // ToDo: Add functionality to sort tasks manually (by dragging), by status, by date and alphabetically.
 // ToDo: Refactor to use logicless templates.
+// ToDo: Be able to handle page refresh from any URL.
 // ToDo: Test.
 define([
     "jquery",
@@ -13,15 +14,18 @@ define([
     "backbone",
     "handlebars",
     "router",
+    "helpers/uim",
     "collections/tasks",
     "views/editTask",
-    "views/task",
-    "jquery.hammer" // This gets included inplicitly and isn't referenced directly.
-], function($, _, Backbone, Handlebars, Router, TasksCollection, EditTaskView, TaskView){
-    var router, tasksCollection, editTaskView, taskViews, swipedTask, $cache;
+    "views/task"
+], function($, _, Backbone, Handlebars, Router, UIM, TasksCollection, EditTaskView, TaskView){
+    var router, uim, tasksCollection, editTaskView, taskViews, swipedTask, $cache;
     
     function initialize() {
         handlebarsHelpers();
+
+        uim = new UIM();
+        uim.initialize();
 
         router = new Router();
         tasksCollection = new TasksCollection();

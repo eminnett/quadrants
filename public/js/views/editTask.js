@@ -1,7 +1,7 @@
 define([
     "backbone",
     "models/task",
-    "text!templates/editTask.html"
+    "libs/text!templates/editTask.html"
 ], function(Backbone, TaskModel, editTaskTemplate){
 
     var template = Handlebars.compile( editTaskTemplate ),

@@ -15,6 +15,7 @@ class Quadrants < Sinatra::Base
     set :haml, { :format => :html5, :ugly => true }
     set :server, %w[thin mongrel webrick]
     set :port, 4567  
+
 end
 
 require_relative 'app/mongo_config'
