@@ -1,6 +1,9 @@
 // The User Interaction Manager (UIM) handles mouse and touch events 
 // and converts the interaction into more meaningful events such as 
 // drag and swipe.
+//
+// ToDo: Implement double tap.
+// ToDo: Implement long press.
 define(["jquery", "underscore"], function($, _){
 
     var UIM, UserInteractionManager;
@@ -23,7 +26,8 @@ define(["jquery", "underscore"], function($, _){
             this.reset();
             this.regListeners();
         };
-            
+        
+        // Reset the interaction data to null states.
         this.reset = function(){
             this.dragStarted = false;
             this.timer = null;
@@ -57,18 +61,20 @@ define(["jquery", "underscore"], function($, _){
             clearTimeout(this.timer);
             
             if(this.step === this.interaction.start && !this.dragStarted)
-                this.dipatch(this.TAP);
+                this.trigger(this.TAP);
             else
-                this.dipatch(this.DRAG_END);
+                this.trigger(this.DRAG_END);
 
             this.reset();
         };
         
+        // Record the mouse position.
         this.onMouseMove = function(e){
             this.mouse.x = e.pageX;
             this.mouse.y = e.pageY;
         };
         
+        // Begin the interaction and initialize the interaction data.
         this.start = function(e){
             this.interaction.target = e.target;
             this.interaction.start.x = e.pageX;
@@ -80,6 +86,7 @@ define(["jquery", "underscore"], function($, _){
             this.timer = setTimeout(this.onInterval, 1000 / this.props.frameRate);
         };
 
+        // Handle the frame interval.
         this.onInterval = function(){
             var now, newDelay;
             this.update();
@@ -92,6 +99,7 @@ define(["jquery", "underscore"], function($, _){
             this.timer = setTimeout(this.onInterval, newDelay);
         };
 
+        // Update interaction data.
         this.update = function(){
             var deltaY = (this.mouse.y && this.step.y) ? this.mouse.y - this.step.y : 0,
                 deltaX = (this.mouse.x && this.step.x) ? this.mouse.x - this.step.x : 0;
@@ -108,7 +116,7 @@ define(["jquery", "underscore"], function($, _){
                     this.interaction.direction = "left";
                 if(this.step === this.interaction.start && !this.dragStarted){
                     this.dragStarted = true;
-                    this.dipatch(this.DRAG_START);
+                    this.trigger(this.DRAG_START);
                 }
                 this.step = _.clone(this.mouse);
             } else {
@@ -125,12 +133,13 @@ define(["jquery", "underscore"], function($, _){
             
         };
 
-        this.dipatch = function(type) {
+        // Simple trigger event helper.
+        this.trigger = function(type) {
             $(this.interaction.target).trigger({
                 type: type,
                 interaction: this.interaction
             }); 
-        }
+        };
     };
 
     return UIM;

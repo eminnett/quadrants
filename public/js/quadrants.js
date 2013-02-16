@@ -1,6 +1,5 @@
 // The core Quadrants application object.
 //
-// ToDo: Refactor Hammer.js out of the app and create a user interaction manager.
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app.
 // ToDo: Add date support.
 // ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
