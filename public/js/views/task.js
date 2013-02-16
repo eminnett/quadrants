@@ -56,11 +56,13 @@ define([
             // dragging or swiping. If the task is dragging, the position is updated.
             handleDrag: function(e){
                 if(!this.drag.dragging) {
-                    if((Math.abs(e.interaction.angle) > 45 && Math.abs(e.interaction.angle) < 135) ||
+                    if((Math.abs(e.interaction.angle) > 45 && Math.abs(e.interaction.angle) < 135 && !this.isPreSwiping) ||
                         e.interaction.distance.y + this.drag.mouseStart.y  < 0 ||
                         e.interaction.distance.y + this.drag.mouseStart.y  > this.topLayer.height()) {
+                        this.isPreSwiping = false;
                         this.initiateDrag();
                     } else {
+                        this.isPreSwiping = true;
                         this.handlePreSwipe(e);
                     }
                 } else {
@@ -77,8 +79,10 @@ define([
             handleDragEnd: function(e){
                 if( this.drag.dragging )
                     this.completeDrag();
-                else
+                else {
+                    this.isPreSwiping = false;
                     this.determineSwipe();
+                }
             },
             // Handles the beginning of a drag interaction.
             initiateDrag: function(){
