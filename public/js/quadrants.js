@@ -13,24 +13,26 @@ define([
     "backbone",
     "handlebars",
     "router",
-    "helpers/uim",
+    "interactionManager",
     "collections/tasks",
     "views/editTask",
     "views/task"
-], function($, _, Backbone, Handlebars, Router, UIM, TasksCollection, EditTaskView, TaskView){
-    var router, uim, tasksCollection, editTaskView, taskViews, swipedTask, $cache;
+], function($, _, Backbone, Handlebars, Router, IM, TasksCollection, EditTaskView, TaskView){
+    var router, interactionManager, tasksCollection, editTaskView, taskViews, swipedTask, $cache;
     
     function initialize() {
         handlebarsHelpers();
 
-        uim = new UIM();
-        uim.initialize();
+        
 
         router = new Router();
+        interactionManager = new IM();
         tasksCollection = new TasksCollection();
         editTaskView = new EditTaskView();
         taskViews = {};
         $cache = {};
+
+        interactionManager.initialize();
 
         cacheElements();
         regJQListeners();
@@ -95,6 +97,7 @@ define([
                     quadrant = parseInt(model.get("priority"), 10);
                 regTaskListeners(taskView);
                 taskViews[model.cid] = taskView;
+                interactionManager.addView(taskView);
                 $(".quadrant").eq(quadrant).find(".task-list").prepend(taskView.$el);
             });
             $cache.tasks = $(".task");
@@ -191,6 +194,7 @@ define([
         var taskView = new TaskView({model: e.task});
         tasksCollection.add(e.task);
         taskViews[e.task.cid] = taskView;
+        interactionManager.addView(taskView);
         regTaskListeners(taskView);
         $cache.tasks = $(".task");
     }
@@ -208,6 +212,7 @@ define([
     function onDelete(e){
         var task = e.task,
             taskView = taskViews[task.cid];
+        interactionManager.removeView(taskView);
         delete taskViews[task.cid];
         task.destroy({url: task.url+"/"+task.id});
         taskView.remove();

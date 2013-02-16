@@ -1,145 +1,160 @@
 define([
     "backbone",
-    "helpers/uim",
     "libs/text!templates/task.html"
-], function(Backbone, UIM, taskTemplate){
+], function(Backbone, taskTemplate){
 
     var template = Handlebars.compile( taskTemplate ),
         TaskView = Backbone.View.extend({
-            TAPPED: "TASK_TAPPED",
-            SWIPE_RESET: "SWIPE_RESET",
-            SWIPED_LEFT: "SWIPED_LEFT",
-            SWIPED_RIGHT: "SWIPED_RIGHT",
-            DRAGGED: "TASK_DRAGGED",
-            DROPPED: "TASK_DROPPED",
-            DELETED: "TASK_DELETED",
+            // TAPPED: "TASK_TAPPED",
+            // SWIPE_RESET: "SWIPE_RESET",
+            // SWIPED_LEFT: "SWIPED_LEFT",
+            // SWIPED_RIGHT: "SWIPED_RIGHT",
+            // DRAGGED: "TASK_DRAGGED",
+            // DROPPED: "TASK_DROPPED",
+            DELETED: "task_deleted",
             className: "task",
             events: {
                 "click .status-icon": "handleStatusChange",
                 "click .action": "handleAction"
             },
             initialize: function(){
+                // These two properties are useed by the InteractionManger.
+                this.canTap = true;
+                this.canDrag = true;
+                this.canSwipe = true;
+
                 this.swipe = { swiping: false, swiped: false };
                 this.drag = { dragging: false };
-                _.bindAll(this, "render", "handleTap", "resetPosCSS",
+                _.bindAll(this, "render", "onTap", "resetPosCSS",
                     "handleStatusChange", "handleAction", "handleDragStart",
                     "initiateDrag", "handleDrag", "handleDragEnd");
                 this.model.on("change", this.render);
                 this.render();
-                this.$el.on("uim_tap", this.handleTap);
-                this.$el.on("uim_drag_start", this.handleDragStart);
-                this.$el.on("uim_drag", this.handleDrag);
-                this.$el.on("uim_drag_end", this.handleDragEnd);
+                // this.$el.on("uim_tap", this.handleTap);
+                // this.$el.on("uim_drag_start", this.handleDragStart);
+                // this.$el.on("uim_drag", this.handleDrag);
+                // this.$el.on("uim_drag_end", this.handleDragEnd);
             },
             render: function(){
                 this.$el.html( template( { id: this.model.id, task:this.model.toJSON() }) );
                 this.topLayer = this.$(".top-layer");
                 return this;
             },
-            handleTap: function() {
+            onTap: function() {
                 this.trigger(this.TAPPED, {task: this.model});
+            },
+            // Returns swiping element. Used by the InteractionManager.
+            getSwipeEl: function() {
+                return this.topLayer;
+            },
+            // Returns the swiping thresholds. Used by the InteractionManager.
+            getSwipeThreshold: function() {
+                return {
+                    right: this.$(".status-options").outerWidth() / 2,
+                    left: this.$(".actions").outerWidth() / 2
+                };
             },
             // Determines the thresholds required to swipe. The start position of the
             // mouse and the starting position of the topLayer are stored
             handleDragStart: function(e){
-                this.swipe.threshold = {
-                    right: this.$(".status-options").outerWidth() / 2,
-                    left: this.$(".actions").outerWidth() / 2
-                };
-                this.swipe.start = { x: this.topLayer.position().left };
-                this.drag.mouseStart = {
-                    x: e.interaction.start.x - this.topLayer.offset().left,
-                    y: e.interaction.start.y - this.topLayer.offset().top
-                };
+                // this.swipe.threshold = {
+                //     right: this.$(".status-options").outerWidth() / 2,
+                //     left: this.$(".actions").outerWidth() / 2
+                // };
+                // this.swipe.start = { x: this.topLayer.position().left };
+                // this.drag.mouseStart = {
+                //     x: e.interaction.start.x - this.topLayer.offset().left,
+                //     y: e.interaction.start.y - this.topLayer.offset().top
+                // };
             },
             // Handles the drag event dispatch and determines if the task should be
             // dragging or swiping. If the task is dragging, the position is updated.
             handleDrag: function(e){
-                if(!this.drag.dragging) {
-                    if((Math.abs(e.interaction.angle) > 45 && Math.abs(e.interaction.angle) < 135 && !this.isPreSwiping) ||
-                        e.interaction.distance.y + this.drag.mouseStart.y  < 0 ||
-                        e.interaction.distance.y + this.drag.mouseStart.y  > this.topLayer.height()) {
-                        this.isPreSwiping = false;
-                        this.initiateDrag();
-                    } else {
-                        this.isPreSwiping = true;
-                        this.handlePreSwipe(e);
-                    }
-                } else {
-                    this.drag.x = this.drag.start.x + e.interaction.distance.x;
-                    this.drag.y = this.drag.start.y + e.interaction.distance.y;
+                // if(!this.drag.dragging) {
+                //     if((Math.abs(e.interaction.angle) > 45 && Math.abs(e.interaction.angle) < 135 && this.isPreSwiping) ||
+                //         e.interaction.distance.y + this.drag.mouseStart.y  < 0 ||
+                //         e.interaction.distance.y + this.drag.mouseStart.y  > this.topLayer.height()) {
+                //         this.isPreSwiping = false;
+                //         this.initiateDrag();
+                //     } else {
+                //         this.isPreSwiping = true;
+                //         this.handlePreSwipe(e);
+                //     }
+                // } else {
+                //     this.drag.x = this.drag.start.x + e.interaction.distance.x;
+                //     this.drag.y = this.drag.start.y + e.interaction.distance.y;
 
-                    this.$el.css({
-                        "left": this.drag.x + "px",
-                        "top": this.drag.y + "px"
-                    });
-                }
+                //     this.$el.css({
+                //         "left": this.drag.x + "px",
+                //         "top": this.drag.y + "px"
+                //     });
+                // }
             },
             // Handles the drag_end event dispatch.
             handleDragEnd: function(e){
-                if( this.drag.dragging )
-                    this.completeDrag();
-                else {
-                    this.isPreSwiping = false;
-                    this.determineSwipe();
-                }
+                // if( this.drag.dragging )
+                //     this.completeDrag();
+                // else {
+                //     this.isPreSwiping = false;
+                //     this.determineSwipe();
+                // }
             },
             // Handles the beginning of a drag interaction.
             initiateDrag: function(){
-                var offsetPos = this.$el.offset();
-                if(this.swipe.swiped)
-                    this.resetSwipe();
-                else
-                    this.resetSwipe({silent: true});
-                this.drag.dragging = true;
-                this.drag.start = {
-                    x: offsetPos.left,
-                    y: offsetPos.top
-                };
-                this.$el.css({
-                    "position": "absolute",
-                    "width": this.$el.width() + "px",
-                    "left": this.drag.start.x + "px",
-                    "top": this.drag.start.y + "px",
-                    "z-index": 1000
-                });
-                $("body").append(this.$el);
-                this.trigger(this.DRAGGED, {task: this.model});
+                // var offsetPos = this.$el.offset();
+                // if(this.swipe.swiped)
+                //     this.resetSwipe();
+                // else
+                //     this.resetSwipe({silent: true});
+                // this.drag.dragging = true;
+                // this.drag.start = {
+                //     x: offsetPos.left,
+                //     y: offsetPos.top
+                // };
+                // this.$el.css({
+                //     "position": "absolute",
+                //     "width": this.$el.width() + "px",
+                //     "left": this.drag.start.x + "px",
+                //     "top": this.drag.start.y + "px",
+                //     "z-index": 1000
+                // });
+                // $("body").append(this.$el);
+                // this.trigger(this.DRAGGED, {task: this.model});
             },
             // Handles the completion of a drag interaction.
             completeDrag: function(){
-                this.$el.removeAttr("style");
-                this.trigger(this.DROPPED, {
-                    task: this.model,
-                    pos: {
-                        x: (this.drag.x + this.drag.mouseStart.x),
-                        y: (this.drag.y + this.drag.mouseStart.y)
-                    }
-                });
-                this.drag = { dragging: false };
+                // this.$el.removeAttr("style");
+                // this.trigger(this.DROPPED, {
+                //     task: this.model,
+                //     pos: {
+                //         x: (this.drag.x + this.drag.mouseStart.x),
+                //         y: (this.drag.y + this.drag.mouseStart.y)
+                //     }
+                // });
+                // this.drag = { dragging: false };
             },
             // Handles the dragging of the topLayer during a swipe interaction.
             handlePreSwipe: function(e){
-                var newX, overSwipe, resistance,
-                    swipeDistance = this.swipe.start.x + e.interaction.distance.x;
-                if(swipeDistance > 0) {
-                    overSwipe = Math.max(0, swipeDistance - this.swipe.threshold.right * 2);
-                } else {
-                    overSwipe = Math.max(0, -swipeDistance - this.swipe.threshold.left * 2);
-                }
+                // var newX, overSwipe, resistance,
+                //     swipeDistance = this.swipe.start.x + e.interaction.distance.x;
+                // if(swipeDistance > 0) {
+                //     overSwipe = Math.max(0, swipeDistance - this.swipe.threshold.right * 2);
+                // } else {
+                //     overSwipe = Math.max(0, -swipeDistance - this.swipe.threshold.left * 2);
+                // }
 
-                if(swipeDistance > 0)
-                    resistance = resist(overSwipe, 0.5 * this.swipe.threshold.right);
-                else
-                    resistance = -resist(overSwipe, 0.5 * this.swipe.threshold.left);
+                // if(swipeDistance > 0)
+                //     resistance = resist(overSwipe, 0.5 * this.swipe.threshold.right);
+                // else
+                //     resistance = -resist(overSwipe, 0.5 * this.swipe.threshold.left);
 
-                newX = swipeDistance - resistance;
+                // newX = swipeDistance - resistance;
 
-                this.topLayer.css({"left": newX + "px"});
+                // this.topLayer.css({"left": newX + "px"});
 
-                function resist(force, threshold){
-                    return force * ( 1 - 1 / (Math.abs(force) / threshold + 1));
-                }
+                // function resist(force, threshold){
+                //     return force * ( 1 - 1 / (Math.abs(force) / threshold + 1));
+                // }
             },
             determineSwipe: function() {
                 var layerPos = this.topLayer.position().left;
