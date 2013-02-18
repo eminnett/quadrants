@@ -1,13 +1,13 @@
-// The Abstract User Interaction Manager (AUIM) handles mouse and touch events 
-// and converts the interaction into more meaningful events such as drag and swipe.
+// The AInteractionConverter handles mouse and touch events and converts the 
+// interaction into more meaningful events such as drag and swipe.
 //
 // ToDo: Implement double tap.
 // ToDo: Implement long press.
 define(["jquery", "underscore"], function($, _){
 
-    var AUIM, AbstractUserInteractionManager;
+    var InteractionConverter;
 
-    AUIM = AbstractUserInteractionManager = function(){
+    InteractionConverter = function(){
         this.props = {
                 frameRate: 50,          // frames/second
                 maxTapDuration: 50,     // miliseconds
@@ -16,12 +16,12 @@ define(["jquery", "underscore"], function($, _){
 
         this.initialize = function(){
             _.bindAll(this, "onMouseDown", "onMouseMove", "onMouseUp", "onInterval", "update");
-            this.TAP = "auim_tap";
-            this.DOUBLE_TAP = "auim_double_tap";
-            this.LONG_PRESS = "auim_long_press";
-            this.DRAG_START = "auim_drag_start";
-            this.DRAG =  "auim_drag";
-            this.DRAG_END = "auim_drag_end";
+            this.TAP = "ic_tap";
+            this.DOUBLE_TAP = "ic_double_tap";
+            this.LONG_PRESS = "ic_long_press";
+            this.DRAG_START = "ic_drag_start";
+            this.DRAG =  "ic_drag";
+            this.DRAG_END = "ic_drag_end";
             this.reset();
             this.regListeners();
         };
@@ -141,5 +141,5 @@ define(["jquery", "underscore"], function($, _){
         };
     };
 
-    return AUIM;
+    return InteractionConverter;
 });

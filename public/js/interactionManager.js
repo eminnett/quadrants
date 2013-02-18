@@ -1,13 +1,13 @@
-define(["jquery", "underscore", "helpers/auim"], function($, _, AUIM){
+define(["jquery", "underscore", "helpers/interactionConverter"], function($, _, InteractionConverter){
 
-    var auim, InteractionManager;
+    var ic, InteractionManager;
 
     InteractionManager = function(){
         var views = {};
 
         this.initialize = function(){
-            auim = new AUIM();
-            auim.initialize();
+            ic = new InteractionConverter();
+            ic.initialize();
             _.bindAll(this, "handleTap", "handleDragStart", "handleDrag", "handleDragEnd");
             this.TAP = "im_tapped";
             this.SWIPE_RESET = "im_swipe_reset";
@@ -23,27 +23,27 @@ define(["jquery", "underscore", "helpers/auim"], function($, _, AUIM){
         this.addView = function(view) {
             views[view.el] = view;
             if(view.canTap){
-                view.$el.on(auim.TAP, this.handleTap);
-                view.$el.on(auim.DOUBLE_TAP, this.handleDTap);
-                view.$el.on(auim.LONG_PRESS, this.handleLongPress);
+                view.$el.on(ic.TAP, this.handleTap);
+                view.$el.on(ic.DOUBLE_TAP, this.handleDTap);
+                view.$el.on(ic.LONG_PRESS, this.handleLongPress);
             }
             if(view.canDrag || view.canSwipe){
-                view.$el.on(auim.DRAG_START, this.handleDragStart);
-                view.$el.on(auim.DRAG, this.handleDrag);
-                view.$el.on(auim.DRAG_END, this.handleDragEnd);
+                view.$el.on(ic.DRAG_START, this.handleDragStart);
+                view.$el.on(ic.DRAG, this.handleDrag);
+                view.$el.on(ic.DRAG_END, this.handleDragEnd);
             }
         };
 
         this.removeView = function(view) {
             if(view.canTap){
-                view.$el.off(auim.TAP, this.handleTap);
-                view.$el.off(auim.DOUBLE_TAP, this.handleDTap);
-                view.$el.off(auim.LONG_PRESS, this.handleLongPress);
+                view.$el.off(ic.TAP, this.handleTap);
+                view.$el.off(ic.DOUBLE_TAP, this.handleDTap);
+                view.$el.off(ic.LONG_PRESS, this.handleLongPress);
             }
             if(view.canDrag || view.canSwipe){
-                view.$el.off(auim.DRAG_START, this.handleDragStart);
-                view.$el.off(auim.DRAG, this.handleDrag);
-                view.$el.off(auim.DRAG_END, this.handleDragEnd);
+                view.$el.off(ic.DRAG_START, this.handleDragStart);
+                view.$el.off(ic.DRAG, this.handleDrag);
+                view.$el.off(ic.DRAG_END, this.handleDragEnd);
             }
             delete views[view.el];
         };
@@ -150,7 +150,7 @@ define(["jquery", "underscore", "helpers/auim"], function($, _, AUIM){
             });
             this.drag = { dragging: false };
         };
-        // Handles the dragging of the topLayer during a swipe interaction.
+        // Handles the dragging of the swipe element during a swipe interaction.
         this.handlePreSwipe = function(e, swipeEl){
             var newX, overSwipe, resistance,
                 swipeDistance = this.swipe.elStart.x + e.interaction.distance.x;
