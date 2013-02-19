@@ -1,6 +1,7 @@
 // The core Quadrants application object.
 //
-// ToDo: Create a global event dispatcher in order to clean up event dispatching across the app.
+// ToDo: Move configuration, utilities, and helpers to individual files referenced in main.js.
+// ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
 // ToDo: Add date support.
 // ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
 // ToDo: Add functionality to sort tasks manually (by dragging), by status, by date and alphabetically.
@@ -113,10 +114,6 @@ define([
         taskView.on(interactionManager.TAP, function(e){
             populateEditView(e.view.model);
         });
-        taskView.on(interactionManager.SWIPE_LEFT, onTaskSwipe);
-        taskView.on(interactionManager.SWIPE_RIGHT, onTaskSwipe);
-        taskView.on(interactionManager.SWIPE_RESET, onSwipeReset);
-        taskView.on(interactionManager.DRAG, onTaskDrag);
         taskView.on(interactionManager.DROP, onTaskDrop);
         taskView.on(taskView.DELETE, onDelete);
     }
@@ -216,26 +213,6 @@ define([
         taskView.remove();
         closeEditModal();
         $cache.tasks = $(".task");
-    }
-
-    // Handle swiping a task.
-    function onTaskSwipe(e) {
-        var task = e.view;
-        if( swipedTask && swipedTask !== taskViews[task.cid])
-            interactionManager.resetInteraction(swipedTask, {silent: true});
-        swipedTask = taskViews[task.cid];
-    }
-
-    // Handle resetting a swiped task.
-    function onSwipeReset(e) {
-        swipedTask = null;
-    }
-
-    // Reset an already swiped task when
-    // another one is dragged.
-    function onTaskDrag(e) {
-        if( swipedTask )
-            interactionManager.resetInteraction(swipedTask);
     }
 
     // Handle dropping a task into a new quadrant.

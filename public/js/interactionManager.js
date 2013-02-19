@@ -3,7 +3,7 @@ define(["jquery", "underscore", "helpers/interactionConverter"], function($, _, 
     var ic, InteractionManager;
 
     InteractionManager = function(){
-        var publicMethods, swipe, drag, isPreSwiping,
+        var publicProps, swipe, drag, isPreSwiping, exclusiveView,
             consts = {
                 TAP: "im_tap",
                 DOUBLE_TAP: "im_double_tap",
@@ -61,20 +61,33 @@ define(["jquery", "underscore", "helpers/interactionConverter"], function($, _, 
                 resetSwipe(view, options);
         }
 
+        function resetExclusive(view) {
+            if(view === exclusiveView)
+                return;
+
+            if(!_.isUndefined(exclusiveView))
+                resetInteraction(exclusiveView);
+
+            exclusiveView = (view.exclusiveInteraction) ? view : undefined;
+        }
+
         function handleTap(e) {
             var view = e.data.view;
+            resetExclusive(view);
             attempt(view, "onTap");
             view.trigger(consts.TAP, {view: view});
         }
 
         function handleDTap(e) {
             var view = e.data.view;
+            resetExclusive(view);
             attempt(view, "onDoubleTap");
             view.trigger(consts.DOUBLE_TAP, {view: view});
         }
 
         function handleLongPress(e) {
             var view = e.data.view;
+            resetExclusive(view);
             attempt(view, "onLongPress");
             view.trigger(consts.LONG_PRESS, {view: view});
         }
@@ -127,6 +140,7 @@ define(["jquery", "underscore", "helpers/interactionConverter"], function($, _, 
         // Handles the beginning of a drag interaction.
         function initiateDrag(view){
             var offsetPos = view.$el.offset();
+            resetExclusive(view);
             if(swipe.swiped)
                 resetSwipe(view);
             else
@@ -194,6 +208,7 @@ define(["jquery", "underscore", "helpers/interactionConverter"], function($, _, 
         }
         function determineSwipe(view) {
             var layerPos = view.getSwipeEl().position().left;
+            resetExclusive(view);
             if( layerPos > 0) {
                 if( layerPos > swipe.threshold.right)
                     swipeRight(view);

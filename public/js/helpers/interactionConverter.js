@@ -98,7 +98,7 @@ define(["jquery", "underscore"], function($, _){
             var now, newDelay;
             update();
             if(!_.isUndefined(interaction.angle)){
-                 trigger(consts.DRAG);
+                trigger(consts.DRAG);
             }
 
             now = new Date().getTime(),
@@ -130,7 +130,6 @@ define(["jquery", "underscore"], function($, _){
                 interaction.angle = undefined;
                 interaction.direction = undefined;
             }
-            
             
             interaction.pos = mouse;
             interaction.distance = {

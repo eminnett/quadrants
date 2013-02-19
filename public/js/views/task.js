@@ -13,6 +13,7 @@ define([
             },
             initialize: function(){
                 // These two properties are useed by the InteractionManger.
+                this.exclusiveInteraction = true;
                 this.canTap = true;
                 this.canDrag = true;
                 this.canSwipe = true;
