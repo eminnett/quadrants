@@ -24,12 +24,12 @@ define([
                 this.task = isNew ? new TaskModel() : task;
                 this.$el.html( template( {isNew: isNew, task: this.task.toJSON()} ) );
                 if( isNew )
-                    this.trigger(this.NEW_TASK, {task: this.task});
+                    this.trigger(this.NEW_TASK, {model: this.task});
                 return this;
             },
             // Cancels the creation of a new task.
             cancelEdit: function(){
-                this.trigger(this.CANCEL_EDIT, {task: this.task});
+                this.trigger(this.CANCEL_EDIT, {model: this.task});
                 return this;
             },
             toggleCritical: function(e){
@@ -62,7 +62,7 @@ define([
             saveTask: function(){
                 this.task.set( this.getProps() );
                 this.task.save();
-                this.trigger(this.SAVE_TASK, {task: this.task});
+                this.trigger(this.SAVE_TASK, {model: this.task});
                 return this;
             },
             toggleArchive: function(){
@@ -75,7 +75,7 @@ define([
                 return this;
             },
             deleteTask: function(){
-                this.trigger(this.DELETE_TASK, {task: this.task});
+                this.trigger(this.DELETE_TASK, {model: this.task});
                 return this;
             },
             // Retrieves the task properties from the markup and sets null values to ''.

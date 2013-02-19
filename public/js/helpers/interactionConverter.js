@@ -8,33 +8,41 @@ define(["jquery", "underscore"], function($, _){
     var InteractionConverter;
 
     InteractionConverter = function(){
-        this.props = {
+        var publicMethods, props, dragStarted, timer, startTime, 
+            prevIntervalTime, mouse, step, interaction,
+            consts = {
+                TAP: "ic_tap",
+                DOUBLE_TAP: "ic_double_tap",
+                LONG_PRESS: "ic_long_press",
+                DRAG_START: "ic_drag_start",
+                DRAG:  "ic_drag",
+                DRAG_END: "ic_drag_end"
+            };
+
+        publicProps = _.extend( consts, {
+            initialize: initialize
+        });
+
+        function initialize(){
+            props = {
                 frameRate: 50,          // frames/second
                 maxTapDuration: 50,     // miliseconds
                 maxDTapInterval: 100    // miliseconds
             };
 
-        this.initialize = function(){
-            _.bindAll(this, "onMouseDown", "onMouseMove", "onMouseUp", "onInterval", "update");
-            this.TAP = "ic_tap";
-            this.DOUBLE_TAP = "ic_double_tap";
-            this.LONG_PRESS = "ic_long_press";
-            this.DRAG_START = "ic_drag_start";
-            this.DRAG =  "ic_drag";
-            this.DRAG_END = "ic_drag_end";
-            this.reset();
-            this.regListeners();
-        };
+            reset();
+            regListeners();
+        }
         
         // Reset the interaction data to null states.
-        this.reset = function(){
-            this.dragStarted = false;
-            this.timer = null;
-            this.startTime = null;
-            this.prevIntervalTime = null;
-            this.mouse = {};
-            this.step = {};
-            this.interaction = {
+        function reset(){
+            dragStarted = false;
+            timer = null;
+            startTime = null;
+            prevIntervalTime = null;
+            mouse = {};
+            step = {};
+            interaction = {
                 duration: 0,
                 angle: null,
                 direction: null,
@@ -43,102 +51,104 @@ define(["jquery", "underscore"], function($, _){
                 distance:{},
                 target: null
             };
-        };
+        }
         
-        this.regListeners = function(){
-            $(document).on("mousedown", this.onMouseDown);
-            $(document).on("mouseup", this.onMouseUp);
-        };
+        function regListeners(){
+            $(document).on("mousedown", onMouseDown);
+            $(document).on("mouseup", onMouseUp);
+        }
         
-        this.onMouseDown = function(e){
-            $(document).on("mousemove", this.onMouseMove);
-            this.start(e); //double tap will have to be taken into account.
-        };
+        function onMouseDown(e){
+            $(document).on("mousemove", onMouseMove);
+            start(e); //double tap will have to be taken into account.
+        }
         
-        this.onMouseUp = function(e){
-            $(document).off("mousemove", this.onMouseMove);
-            clearTimeout(this.timer);
+        function onMouseUp(e){
+            $(document).off("mousemove", onMouseMove);
+            clearTimeout(timer);
             
-            if(this.step === this.interaction.start && !this.dragStarted)
-                this.trigger(this.TAP);
+            if(step === interaction.start && !dragStarted)
+                trigger(consts.TAP);
             else
-                this.trigger(this.DRAG_END);
+                trigger(consts.DRAG_END);
 
-            this.reset();
-        };
+            reset();
+        }
         
         // Record the mouse position.
-        this.onMouseMove = function(e){
-            this.mouse.x = e.pageX;
-            this.mouse.y = e.pageY;
-        };
+        function onMouseMove(e){
+            mouse.x = e.pageX;
+            mouse.y = e.pageY;
+        }
         
         // Begin the interaction and initialize the interaction data.
-        this.start = function(e){
-            this.interaction.target = e.target;
-            this.interaction.start.x = e.pageX;
-            this.interaction.start.y = e.pageY;
-            this.step = this.interaction.start;
+        function start(e){
+            interaction.target = e.target;
+            interaction.start.x = e.pageX;
+            interaction.start.y = e.pageY;
+            step = interaction.start;
 
-            this.startTime = new Date().getTime();
-            this.prevIntervalTime = this.startTime;
-            this.timer = setTimeout(this.onInterval, 1000 / this.props.frameRate);
-        };
+            startTime = new Date().getTime();
+            prevIntervalTime = startTime;
+            timer = setTimeout(onInterval, 1000 / props.frameRate);
+        }
 
         // Handle the frame interval.
-        this.onInterval = function(){
+        function onInterval(){
             var now, newDelay;
-            this.update();
-            if(!_.isUndefined(this.interaction.angle)){
-                 this.trigger(this.DRAG);
+            update();
+            if(!_.isUndefined(interaction.angle)){
+                 trigger(consts.DRAG);
             }
 
             now = new Date().getTime(),
-            newDelay = Math.max(10, 1000 / this.props.frameRate - (now - this.prevIntervalTime));
-            this.timer = setTimeout(this.onInterval, newDelay);
-        };
+            newDelay = Math.max(10, 1000 / props.frameRate - (now - prevIntervalTime));
+            timer = setTimeout(onInterval, newDelay);
+        }
 
         // Update interaction data.
-        this.update = function(){
-            var deltaY = (this.mouse.y && this.step.y) ? this.mouse.y - this.step.y : 0,
-                deltaX = (this.mouse.x && this.step.x) ? this.mouse.x - this.step.x : 0;
-            this.interaction.duration = new Date().getTime() - this.startTime;
+        function update(){
+            var deltaY = (mouse.y && step.y) ? mouse.y - step.y : 0,
+                deltaX = (mouse.x && step.x) ? mouse.x - step.x : 0;
+            interaction.duration = new Date().getTime() - startTime;
             if( _.any([deltaY, deltaX])) {
-                var angle = this.interaction.angle = Math.atan2( deltaY, deltaX ) * 180 / Math.PI;
+                var angle = interaction.angle = Math.atan2( deltaY, deltaX ) * 180 / Math.PI;
                 if(angle > -135 && angle < -45 )
-                    this.interaction.direction = "up";
+                    interaction.direction = "up";
                 else if(angle > -45 && angle < 45)
-                    this.interaction.direction = "right";
+                    interaction.direction = "right";
                 else if(angle > 45 && angle < 135)
-                    this.interaction.direction = "down";
+                    interaction.direction = "down";
                 else
-                    this.interaction.direction = "left";
-                if(this.step === this.interaction.start && !this.dragStarted){
-                    this.dragStarted = true;
-                    this.trigger(this.DRAG_START);
+                    interaction.direction = "left";
+                if(step === interaction.start && !dragStarted){
+                    dragStarted = true;
+                    trigger(consts.DRAG_START);
                 }
-                this.step = _.clone(this.mouse);
+                step = _.clone(mouse);
             } else {
-                this.interaction.angle = undefined;
-                this.interaction.direction = undefined;
+                interaction.angle = undefined;
+                interaction.direction = undefined;
             }
             
             
-            this.interaction.pos = this.mouse;
-            this.interaction.distance = {
-                x: this.mouse.x - this.interaction.start.x,
-                y: this.mouse.y - this.interaction.start.y
+            interaction.pos = mouse;
+            interaction.distance = {
+                x: mouse.x - interaction.start.x,
+                y: mouse.y - interaction.start.y
             };
             
-        };
+        }
 
         // Simple trigger event helper.
-        this.trigger = function(type) {
-            $(this.interaction.target).trigger({
+        function trigger(type) {
+            $(interaction.target).trigger({
                 type: type,
-                interaction: this.interaction
+                interaction: interaction
             }); 
-        };
+        }
+
+        return publicProps;
     };
 
     return InteractionConverter;

@@ -17,16 +17,14 @@ define([
     "collections/tasks",
     "views/editTask",
     "views/task"
-], function($, _, Backbone, Handlebars, Router, IM, TasksCollection, EditTaskView, TaskView){
+], function($, _, Backbone, Handlebars, Router, InteractionManager, TasksCollection, EditTaskView, TaskView){
     var router, interactionManager, tasksCollection, editTaskView, taskViews, swipedTask, $cache;
     
     function initialize() {
         handlebarsHelpers();
 
-        
-
         router = new Router();
-        interactionManager = new IM();
+        interactionManager = new InteractionManager();
         tasksCollection = new TasksCollection();
         editTaskView = new EditTaskView();
         taskViews = {};
@@ -112,15 +110,15 @@ define([
     }
 
     function regTaskListeners(taskView) {
-        taskView.on(taskView.TAPPED, function(e){
-            populateEditView(e.task);
+        taskView.on(interactionManager.TAP, function(e){
+            populateEditView(e.view.model);
         });
-        taskView.on(taskView.SWIPED_LEFT, onTaskSwipe);
-        taskView.on(taskView.SWIPED_RIGHT, onTaskSwipe);
-        taskView.on(taskView.SWIPE_RESET, onSwipeReset);
-        taskView.on(taskView.DRAGGED, onTaskDrag);
-        taskView.on(taskView.DROPPED, onTaskDrop);
-        taskView.on(taskView.DELETED, onDelete);
+        taskView.on(interactionManager.SWIPE_LEFT, onTaskSwipe);
+        taskView.on(interactionManager.SWIPE_RIGHT, onTaskSwipe);
+        taskView.on(interactionManager.SWIPE_RESET, onSwipeReset);
+        taskView.on(interactionManager.DRAG, onTaskDrag);
+        taskView.on(interactionManager.DROP, onTaskDrop);
+        taskView.on(taskView.DELETE, onDelete);
     }
 
     // Handles the filtering of tasks based on status, criticality
@@ -183,7 +181,7 @@ define([
 
     function populateEditView(task) {
         if(!_.isUndefined(task))
-            taskViews[task.cid].resetSwipe();
+            interactionManager.resetInteraction(taskViews[task.cid], {silent: true});
         editTaskView.render(task);
         openEditModal();
         // Immediately navigate back to root to minimize issues with LiveReload.
@@ -191,9 +189,9 @@ define([
     }
 
     function createNewTask(e) {
-        var taskView = new TaskView({model: e.task});
-        tasksCollection.add(e.task);
-        taskViews[e.task.cid] = taskView;
+        var taskView = new TaskView({model: e.model});
+        tasksCollection.add(e.model);
+        taskViews[e.model.cid] = taskView;
         interactionManager.addView(taskView);
         regTaskListeners(taskView);
         $cache.tasks = $(".task");
@@ -201,7 +199,7 @@ define([
 
     // Handle saving a task.
     function onSave(e){
-        var task = e.task,
+        var task = e.model,
             quadrant = parseInt(task.get("priority"), 10),
             taskView = taskViews[task.cid];
         $(".quadrant").eq(quadrant).find(".task-list").prepend(taskView.$el);
@@ -210,7 +208,7 @@ define([
 
     // Handle deleting a task.
     function onDelete(e){
-        var task = e.task,
+        var task = e.model,
             taskView = taskViews[task.cid];
         interactionManager.removeView(taskView);
         delete taskViews[task.cid];
@@ -222,9 +220,10 @@ define([
 
     // Handle swiping a task.
     function onTaskSwipe(e) {
-        if( swipedTask && swipedTask !== taskViews[e.task.cid])
-            swipedTask.resetSwipe({silent: true});
-        swipedTask = taskViews[e.task.cid];
+        var task = e.view;
+        if( swipedTask && swipedTask !== taskViews[task.cid])
+            interactionManager.resetInteraction(swipedTask, {silent: true});
+        swipedTask = taskViews[task.cid];
     }
 
     // Handle resetting a swiped task.
@@ -236,26 +235,27 @@ define([
     // another one is dragged.
     function onTaskDrag(e) {
         if( swipedTask )
-            swipedTask.resetSwipe();
+            interactionManager.resetInteraction(swipedTask);
     }
 
     // Handle dropping a task into a new quadrant.
     function onTaskDrop(e) {
-        var dropElement = document.elementFromPoint( e.pos.x, e.pos.y ),
+        var task = e.view.model,
+            dropElement = document.elementFromPoint( e.pos.x, e.pos.y ),
             targetQuadrant = $(dropElement).parents(".quadrant"),
             dropTarget = targetQuadrant.find(".task-list"),
             priority = targetQuadrant.attr("data-priority");
 
         if(dropTarget.length > 0) {
-            e.task.set("priority", priority);
+            task.set("priority", priority);
             if( priority !== "0")
-                e.task.set("critical", false);
-            e.task.save();
+                task.set("critical", false);
+            task.save();
         } else {
-            targetQuadrant = $(".quadrant[data-priority='" + e.task.get("priority")+ "']");
+            targetQuadrant = $(".quadrant[data-priority='" + task.get("priority")+ "']");
             dropTarget = targetQuadrant.find(".task-list");
         }
-        dropTarget.prepend(taskViews[e.task.cid].$el);
+        dropTarget.prepend(e.view.$el);
     }
 
     // Open the EditTask modal window.
