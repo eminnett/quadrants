@@ -42,14 +42,12 @@
                     .quadrant-label.top
                         .text
                             Urgent
-                    = partial :taskContainer
                 .vertical-divider.divider
                     .drag-affordance.one-dimension
                 .quadrant.right{:"data-priority" => "1"}
                     .quadrant-label.top
                         .text
                             Not&nbsp;Urgent
-                    = partial :taskContainer
             .horizontal-dividers
                 .horizontal-divider.divider
                     .drag-affordance.one-dimension
@@ -61,11 +59,9 @@
                     .quadrant-label.left
                         .text
                             Not&nbsp;Important
-                    = partial :taskContainer
                 .vertical-divider.divider
                     .drag-affordance.one-dimension
                 .quadrant.right{:"data-priority" => "3"}
-                    = partial :taskContainer
         %footer
             &copy; 2013 EJM
         #route{:"data-route" => @route}

@@ -23,6 +23,7 @@ define([
                 _.bindAll(this, "render", "handleStatusChange", "handleAction");
                 this.model.on("change", this.render);
                 this.render();
+                return this;
             },
             render: function(){
                 this.$el.html( template( { id: this.model.id, task:this.model.toJSON() }) );

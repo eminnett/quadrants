@@ -1,12 +1,12 @@
 // Task-container HTML structure:
-// <div class="task-container">
+// <div class="task-list-wrapper">
 //     <div class="scroll-panel">
 //         <div class="task-list">
 // 		       Tasks...
 //         </div>
 //     </div>
 // </div>
-.task-container {
+.task-list-wrapper {
 	height: 100%;
 	width: 100%;
 	margin: 0 0 0.1px 0;

@@ -12,12 +12,14 @@ define([
     "underscore",
     "backbone",
     "router",
-    "interactionManager",
+    "managers/interaction",
     "collections/tasks",
     "views/editTask",
+    "views/taskList",
     "views/task"
-], function($, _, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskView){
-    var router, interactionManager, tasksCollection, editTaskView, taskViews, swipedTask, $cache;
+], function($, _, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskListView, TaskView){
+    var router, interactionManager, taskListManager, tasksCollection,
+        editTaskView, taskLists, taskViews, swipedTask, $cache;
     
     function initialize() {
         router = new Router();
@@ -29,6 +31,7 @@ define([
 
         interactionManager.initialize();
 
+        instantiateTaskLists();
         cacheElements();
         regJQListeners();
         regRouterListeners();
@@ -37,6 +40,22 @@ define([
 
         $("body").append(editTaskView.$el);
         Backbone.history.start({pushState: true, root: '/'});
+    }
+
+    // Creates a task list for each quadrant and inserts the html.
+    function instantiateTaskLists() {
+        var halfs = $(".half");
+        taskLists = {
+            topLeft: new TaskListView(),
+            topRight: new TaskListView(),
+            bottomLeft: new TaskListView(),
+            bottomRight: new TaskListView()
+        };
+
+        halfs.filter(".top").find(".quadrant.left").append(taskLists.topLeft.$el);
+        halfs.filter(".top").find(".quadrant.right").append(taskLists.topRight.$el);
+        halfs.filter(".bottom").find(".quadrant.left").append(taskLists.bottomLeft.$el);
+        halfs.filter(".bottom").find(".quadrant.right").append(taskLists.bottomRight.$el);
     }
 
     // Caches jQuery objects for later use. Queries that

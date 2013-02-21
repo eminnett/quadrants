@@ -1,4 +1,4 @@
-// The AInteractionConverter handles mouse and touch events and converts the 
+// The AInteractionConverter handles mouse and touch events and converts the
 // interaction into more meaningful events such as drag and swipe.
 //
 // ToDo: Implement double tap.
@@ -8,7 +8,7 @@ define(["jquery", "underscore"], function($, _){
     var InteractionConverter;
 
     InteractionConverter = function(){
-        var publicMethods, props, dragStarted, timer, startTime, 
+        var publicMethods, props, dragStarted, timer, startTime,
             prevIntervalTime, mouse, step, interaction,
             consts = {
                 TAP: "ic_tap",
@@ -144,7 +144,7 @@ define(["jquery", "underscore"], function($, _){
             $(interaction.target).trigger({
                 type: type,
                 interaction: interaction
-            }); 
+            });
         }
 
         return publicProps;

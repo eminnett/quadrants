@@ -1,7 +1,7 @@
 @import "components/quadrants";			// The containers for the quadrants and the quadrants.
 @import "components/quadrant-label";	// The labels in the three top and/or left quadrants.
 @import "components/dividers";			// The dividers that seperate the four quadrants.
-@import "components/task-container";	// The container for the list of tasks in each quadrant.
+@import "components/task-list";			// The container for the list of tasks in each quadrant.
 @import "components/task";				// The task module reppresented by the TaskView.
 @import "components/status-options";	// The container for the status-icons in the EditTaskView.
 @import "components/actions";			// The container for the buttons in the EditTaskView.

@@ -8,7 +8,7 @@
 	&.left {
 		width: $LABEL_THICKNESS;
 		height: 100%;
-		& ~ .task-container {
+		& ~ .task-list-wrapper {
 			padding-left: $LABEL_THICKNESS;
 		}
 	}
@@ -16,7 +16,7 @@
 		width: 100%;
 		height: $LABEL_THICKNESS;
 		padding-left: 5px;
-		& ~ .task-container {
+		& ~ .task-list-wrapper {
 			padding-top: $LABEL_THICKNESS;
 		}
 	}
