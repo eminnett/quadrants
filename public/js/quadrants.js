@@ -1,29 +1,25 @@
 // The core Quadrants application object.
 //
-// ToDo: Move configuration, utilities, and helpers to individual files referenced in main.js.
-// ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
-// ToDo: Add date support.
-// ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
 // ToDo: Add functionality to sort tasks manually (by dragging), by status, by date and alphabetically.
 // ToDo: Refactor to use logicless templates.
 // ToDo: Be able to handle page refresh from any URL.
+// ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
+// ToDo: Add date support.
+// ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
 // ToDo: Test.
 define([
     "jquery",
     "underscore",
     "backbone",
-    "handlebars",
     "router",
     "interactionManager",
     "collections/tasks",
     "views/editTask",
     "views/task"
-], function($, _, Backbone, Handlebars, Router, InteractionManager, TasksCollection, EditTaskView, TaskView){
+], function($, _, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskView){
     var router, interactionManager, tasksCollection, editTaskView, taskViews, swipedTask, $cache;
     
     function initialize() {
-        handlebarsHelpers();
-
         router = new Router();
         interactionManager = new InteractionManager();
         tasksCollection = new TasksCollection();
@@ -41,25 +37,6 @@ define([
 
         $("body").append(editTaskView.$el);
         Backbone.history.start({pushState: true, root: '/'});
-    }
-
-    // Defines helper blocks for Handlebars.
-    function handlebarsHelpers(){
-        //Tests equality.
-        Handlebars.registerHelper("ifEqual", function(v1, v2, options) {
-            if(v1 == v2) {
-                return options.fn(this);
-            }
-            return options.inverse(this);
-        });
-
-        //Tests inequality.
-        Handlebars.registerHelper("ifNotEqual", function(v1, v2, options) {
-            if(v1 != v2) {
-                return options.fn(this);
-            }
-            return options.inverse(this);
-        });
     }
 
     // Caches jQuery objects for later use. Queries that

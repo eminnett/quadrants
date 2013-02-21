@@ -1,4 +1,8 @@
-define(["jquery", "underscore", "helpers/interactionConverter"], function($, _, InteractionConverter){
+define([
+    "jquery", 
+    "underscore", 
+    "helpers/interactionConverter"
+], function($, _, InteractionConverter){
 
     var ic, InteractionManager;
 

@@ -31,6 +31,7 @@ require.config({
 });
 
 //Initialize the quadrants app.
-require(["quadrants"], function(Q){
+require(["helpers/handlebars", "quadrants"], function(handlebarsHelpers, Q){
+    handlebarsHelpers();
     Q.initialize();
 });
