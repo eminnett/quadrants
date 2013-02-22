@@ -38,4 +38,7 @@
 	.bottom & {
 		padding-top: $DIVIDER_THICKNESS/2;
 	}
+	&.drop-target {
+		border: 1px solid #FF0000;
+	}
 }

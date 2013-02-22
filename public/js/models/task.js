@@ -2,7 +2,7 @@ define(["underscore", "backbone"], function(_, Backbone) {
     var TaskModel = Backbone.Model.extend({
         url: "/task",
         defaults : {
-            title: "",
+            title: "Default Title",
             priority: "0",
             order: "0",
             date: "",

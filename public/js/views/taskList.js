@@ -14,7 +14,11 @@ define([
             },
             render: function(){
                 this.$el.html(template());
+                this.taskList = this.$(".task-list");
                 return this;
+            },
+            insert: function(task){
+                this.taskList.prepend(task.$el);
             }
         });
 

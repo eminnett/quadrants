@@ -72,6 +72,9 @@
             padding: 0 0 0 10px;
         }
     }
+    &.drop-target {
+        border: 2px solid #FF0000;
+    }
     &:hover {
         .top-layer {
             color: $CYAN;

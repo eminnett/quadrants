@@ -19,16 +19,38 @@ define([
                 "click #delete-task": "deleteTask",
                 "click .mask": "cancelEdit"
             },
+            initialize: function(){
+                _.bindAll(this, "afterOpenModal", "afterCloseModal");
+                return this;
+            },
             render: function(task){
                 var isNew = task === undefined;
                 this.task = isNew ? new TaskModel() : task;
                 this.$el.html( template( {isNew: isNew, task: this.task.toJSON()} ) );
+                this.openModal();
                 if( isNew )
                     this.trigger(this.NEW_TASK, {model: this.task});
                 return this;
             },
+            // Open the modal window.
+            openModal: function(){
+                this.$el.removeClass("is-hidden").hide().fadeIn(this.afterOpenModal);
+            },
+            // Close the modal window.
+            closeModal: function(){
+                this.$el.fadeOut(this.afterCloseModal);
+            },
+            // Adjust the element style after the modal opens.
+            afterOpenModal: function(){
+                this.$el.css({"display": ""});
+            },
+            // Adjust the element style and state after the modal closes.
+            afterCloseModal: function(){
+                this.$el.addClass("is-hidden").css({"display": ""});
+            },
             // Cancels the creation of a new task.
             cancelEdit: function(){
+                this.closeModal();
                 this.trigger(this.CANCEL_EDIT, {model: this.task});
                 return this;
             },
@@ -62,6 +84,7 @@ define([
             saveTask: function(){
                 this.task.set( this.getProps() );
                 this.task.save();
+                this.closeModal();
                 this.trigger(this.SAVE_TASK, {model: this.task});
                 return this;
             },
@@ -75,6 +98,7 @@ define([
                 return this;
             },
             deleteTask: function(){
+                this.closeModal();
                 this.trigger(this.DELETE_TASK, {model: this.task});
                 return this;
             },

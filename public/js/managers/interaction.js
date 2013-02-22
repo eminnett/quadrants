@@ -15,14 +15,15 @@ define([
                 SWIPE_RESET: "im_swipe_reset",
                 SWIPE_LEFT: "im_swipe_left",
                 SWIPE_RIGHT: "im_swipe_right",
+                DRAG_START: "im_drag_start",
                 DRAG: "im_drag",
                 DROP: "im_drop"
             };
 
         publicProps = _.extend(consts, {
             initialize: initialize,
-            addView: addView,
-            removeView: removeView,
+            registerView: registerView,
+            unregisterView: unregisterView,
             resetInteraction: resetInteraction
         });
 
@@ -34,7 +35,7 @@ define([
             drag = { dragging: false };
         }
 
-        function addView(view) {
+        function registerView(view) {
             if(view.canTap){
                 view.$el.on(ic.TAP, {view: view}, handleTap);
                 view.$el.on(ic.DOUBLE_TAP, {view: view}, handleDTap);
@@ -47,7 +48,7 @@ define([
             }
         }
 
-        function removeView(view) {
+        function unregisterView(view) {
             if(view.canTap){
                 view.$el.off(ic.TAP, handleTap);
                 view.$el.off(ic.DOUBLE_TAP, handleDTap);
@@ -99,6 +100,7 @@ define([
         function handleDragStart(e) {
             var view = e.data.view;
             if(view.canSwipe) {
+                view.$el.addClass("is-swiping");
                 swipe.threshold = view.getSwipeThreshold();
                 swipe.elStart = { x: view.getSwipeEl().position().left };
             }
@@ -119,7 +121,7 @@ define([
                         e.interaction.distance.y + drag.localMouseStart.y  > view.getSwipeEl().height()) {
                         isPreSwiping = false;
                         if(view.canDrag) {
-                            initiateDrag(view);  
+                            initiateDrag(view);
                         } else {
                             determineSwipe(view);
                         }
@@ -138,6 +140,13 @@ define([
                     "left": drag.x + "px",
                     "top": drag.y + "px"
                 });
+                view.trigger(consts.DRAG, {
+                    view: view,
+                    pos: {
+                        x: (drag.x + drag.localMouseStart.x),
+                        y: (drag.y + drag.localMouseStart.y)
+                    }
+                });
             }
         }
 
@@ -154,6 +163,7 @@ define([
                 x: offsetPos.left,
                 y: offsetPos.top
             };
+            view.$el.removeClass("is-swiping").addClass("is-dragging");
             view.$el.css({
                 "position": "absolute",
                 "width": view.$el.width() + "px",
@@ -162,7 +172,7 @@ define([
                 "z-index": 1000
             });
             $("body").append(view.$el);
-            view.trigger(consts.DRAG, {view: view});
+            view.trigger(consts.DRAG_START, {view: view});
         }
 
         // Handles the drag_end event dispatch.
@@ -177,6 +187,7 @@ define([
         }
         // Handles the completion of a drag interaction.
         function completeDrag(view){
+            removeStates(view);
             view.$el.removeAttr("style");
             view.trigger(consts.DROP, {
                 view: view,
@@ -228,26 +239,31 @@ define([
         // Completes a swipe to the left.
         function swipeLeft(view){
             swipe.swiped = true;
-            view.getSwipeEl().animate({"left": (-view.getSwipeLeftDistance())+"px"});
+            view.getSwipeEl().animate({"left": (-view.getSwipeLeftDistance())+"px"}, function(){removeStates(view);});
             attempt(view, "onSwipeLeft");
             view.trigger(consts.SWIPE_LEFT, {view: view});
         }
         // Completes a swipe to the right.
         function swipeRight(view){
             swipe.swiped = true;
-            view.getSwipeEl().animate({"left": view.getSwipeRightDistance()+"px"});
+            view.getSwipeEl().animate({"left": view.getSwipeRightDistance()+"px"}, function(){removeStates(view);});
             attempt(view, "onSwipeRight");
             view.trigger(consts.SWIPE_RIGHT, {view: view});
         }
         // Resets the swipe (and shakes it all about. No not really ;))
         function resetSwipe(view, options){
             view.getSwipeEl().animate({"left": 0}, function(){
+                removeStates(view);
                 swipe.swiped = false;
                 view.getSwipeEl().css({"left": ''});
             });
             attempt(view, "onResetSwipe");
             if( _.isUndefined(options) || !options.silent)
                view.trigger(consts.SWIPE_RESET, {view: view});
+        }
+
+        function removeStates(view) {
+            view.$el.removeClass("is-dragging").removeClass("is-swiping");
         }
 
         function attempt(){

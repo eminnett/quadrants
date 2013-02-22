@@ -5,6 +5,7 @@
 // ToDo: Be able to handle page refresh from any URL.
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
 // ToDo: Add date support.
+// ToDo: Create (or at least begin creating) a responsive layout.
 // ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
 // ToDo: Test.
 define([
@@ -16,8 +17,9 @@ define([
     "collections/tasks",
     "views/editTask",
     "views/taskList",
-    "views/task"
-], function($, _, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskListView, TaskView){
+    "views/task",
+    "helpers/drag"
+], function($, _, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskListView, TaskView, dragHelper){
     var router, interactionManager, taskListManager, tasksCollection,
         editTaskView, taskLists, taskViews, swipedTask, $cache;
     
@@ -46,16 +48,16 @@ define([
     function instantiateTaskLists() {
         var halfs = $(".half");
         taskLists = {
-            topLeft: new TaskListView(),
-            topRight: new TaskListView(),
-            bottomLeft: new TaskListView(),
-            bottomRight: new TaskListView()
+            topLeft: { priority: 0, view: new TaskListView() },
+            topRight: { priority: 1, view: new TaskListView() },
+            bottomLeft: { priority: 2, view: new TaskListView() },
+            bottomRight: { priority: 3, view: new TaskListView() }
         };
 
-        halfs.filter(".top").find(".quadrant.left").append(taskLists.topLeft.$el);
-        halfs.filter(".top").find(".quadrant.right").append(taskLists.topRight.$el);
-        halfs.filter(".bottom").find(".quadrant.left").append(taskLists.bottomLeft.$el);
-        halfs.filter(".bottom").find(".quadrant.right").append(taskLists.bottomRight.$el);
+        halfs.filter(".top").find(".quadrant.left").append(taskLists.topLeft.view.$el);
+        halfs.filter(".top").find(".quadrant.right").append(taskLists.topRight.view.$el);
+        halfs.filter(".bottom").find(".quadrant.left").append(taskLists.bottomLeft.view.$el);
+        halfs.filter(".bottom").find(".quadrant.right").append(taskLists.bottomRight.view.$el);
     }
 
     // Caches jQuery objects for later use. Queries that
@@ -89,11 +91,11 @@ define([
         tasksCollection.on('reset', function(e){
             _.each(e.models, function(model){
                 var taskView = new TaskView({model: model}),
-                    quadrant = parseInt(model.get("priority"), 10);
+                    priority = parseInt(model.get("priority"), 10);
                 regTaskListeners(taskView);
                 taskViews[model.cid] = taskView;
-                interactionManager.addView(taskView);
-                $(".quadrant").eq(quadrant).find(".task-list").prepend(taskView.$el);
+                interactionManager.registerView(taskView);
+                _.where(taskLists, {priority: priority})[0].view.insert(taskView);
             });
             $cache.tasks = $(".task");
         });
@@ -110,6 +112,7 @@ define([
         taskView.on(interactionManager.TAP, function(e){
             populateEditView(e.view.model);
         });
+        taskView.on(interactionManager.DRAG, onTaskDrag);
         taskView.on(interactionManager.DROP, onTaskDrop);
         taskView.on(taskView.DELETE, onDelete);
     }
@@ -176,7 +179,6 @@ define([
         if(!_.isUndefined(task))
             interactionManager.resetInteraction(taskViews[task.cid], {silent: true});
         editTaskView.render(task);
-        openEditModal();
         // Immediately navigate back to root to minimize issues with LiveReload.
         router.navigate( "/", {trigger: false} );
     }
@@ -185,7 +187,7 @@ define([
         var taskView = new TaskView({model: e.model});
         tasksCollection.add(e.model);
         taskViews[e.model.cid] = taskView;
-        interactionManager.addView(taskView);
+        interactionManager.registerView(taskView);
         regTaskListeners(taskView);
         $cache.tasks = $(".task");
     }
@@ -196,28 +198,55 @@ define([
             quadrant = parseInt(task.get("priority"), 10),
             taskView = taskViews[task.cid];
         $(".quadrant").eq(quadrant).find(".task-list").prepend(taskView.$el);
-        closeEditModal();
     }
 
     // Handle deleting a task.
     function onDelete(e){
         var task = e.model,
             taskView = taskViews[task.cid];
-        interactionManager.removeView(taskView);
+        interactionManager.unregisterView(taskView);
         delete taskViews[task.cid];
         task.destroy({url: task.url+"/"+task.id});
         taskView.remove();
-        closeEditModal();
         $cache.tasks = $(".task");
     }
 
+    // Handle dragging a task.
+    function onTaskDrag(e){
+        var target, targetQuadrant, hitTestTasks, offset, boundary,
+            taskView = e.view;
+            
+        //if (taskView.$el.hasClass("is-dragging")) { //class not working as expected yet
+            targetQuadrant = dragHelper.getQuadrantAtPoint(e.pos.x, e.pos.y);
+            if(targetQuadrant.length > 0) {
+                if(!targetQuadrant.hasClass("drop-target")){
+                    $(".quadrant.drop-target").removeClass("drop-target");
+                    targetQuadrant.addClass("drop-target");
+                }
+                boundary = dragHelper.getBoundary(taskView.$el);
+                $(".task.drop-target").removeClass("drop-target");
+                hitTestTasks = dragHelper.getTaskAtPoint(targetQuadrant, boundary.left, boundary.top)
+                    .add(dragHelper.getTaskAtPoint(targetQuadrant, boundary.right, boundary.top))
+                    .add(dragHelper.getTaskAtPoint(targetQuadrant, boundary.left, boundary.bottom))
+                    .add(dragHelper.getTaskAtPoint(targetQuadrant, boundary.right, boundary.bottom));
+                hitTestTasks.addClass("drop-target");
+            } else {
+                $(".task.drop-target").removeClass("drop-target");
+                $(".quadrant.drop-target").removeClass("drop-target");
+            }
+        //}
+    }
+
     // Handle dropping a task into a new quadrant.
+    // ToDo: This needs to integrate with the TaskList views.
     function onTaskDrop(e) {
         var task = e.view.model,
             dropElement = document.elementFromPoint( e.pos.x, e.pos.y ),
             targetQuadrant = $(dropElement).parents(".quadrant"),
             dropTarget = targetQuadrant.find(".task-list"),
             priority = targetQuadrant.attr("data-priority");
+
+        $(".drop-target").removeClass("drop-target");
 
         if(dropTarget.length > 0) {
             task.set("priority", priority);
@@ -229,20 +258,6 @@ define([
             dropTarget = targetQuadrant.find(".task-list");
         }
         dropTarget.prepend(e.view.$el);
-    }
-
-    // Open the EditTask modal window.
-    function openEditModal(){
-        editTaskView.$el.removeClass("is-hidden").hide().fadeIn(function(){
-            editTaskView.$el.css({"display": ""});
-        });
-    }
-
-    // Close the EditTask modal window.
-    function closeEditModal(){
-        editTaskView.$el.fadeOut(function(){
-            editTaskView.$el.addClass("is-hidden").css({"display": ""});
-        });
     }
 
     // Initialize is the only public method.

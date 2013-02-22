@@ -29,7 +29,7 @@ define([
                 this.$el.html( template( { id: this.model.id, task:this.model.toJSON() }) );
                 return this;
             },
-            // Returns swiping element. Used by the InteractionManager.
+            // Returns the swiping element. Used by the InteractionManager.
             getSwipeEl: function() {
                 return this.$(".top-layer");
             },
@@ -77,7 +77,7 @@ define([
                         this.model.save();
                     };
                 }
-                this.resetSwipe(); // How will this work?
+                //this.resetSwipe(); // How will this work?
                 return this;
             },
             // Handles a change in archive state or deletion. This can
@@ -97,7 +97,7 @@ define([
                         this.model.save();
                     };
                 }
-                this.resetSwipe(); // How will this work?
+                //this.resetSwipe(); // How will this work?
             }
         });
 
