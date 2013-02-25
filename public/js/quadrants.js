@@ -13,7 +13,7 @@ define([
     "underscore",
     "backbone",
     "router",
-    "managers/interaction",
+    "managers/userInteraction",
     "collections/tasks",
     "views/editTask",
     "views/taskList",
