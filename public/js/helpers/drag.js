@@ -2,7 +2,8 @@ define([], function(){
     var publicProps = {
             getQuadrantAtPoint: getQuadrantAtPoint,
             getTaskAtPoint: getTaskAtPoint,
-            getBoundary: getBoundary
+            getBoundary: getBoundary,
+            boundariesIntersect: boundariesIntersect
         };
 
     function getQuadrantAtPoint(x, y) {
@@ -10,9 +11,9 @@ define([], function(){
             quadrant = $();
         $(".quadrant").each(function(){
             boundary = getBoundary($(this));
-            if( isInsideBoundaries(boundary, x, y) ) {
+            if( isInsideBoundary(boundary, x, y) ) {
                 quadrant = $(this);
-                return false; //break
+                return false;
             }
         });
         return quadrant;
@@ -23,9 +24,9 @@ define([], function(){
             task = $();
         quadrant.find(".task").each(function(){
             boundary = getBoundary($(this));
-            if( isInsideBoundaries(boundary, x, y) ) {
+            if( isInsideBoundary(boundary, x, y) ) {
                 task = $(this);
-                return false; //break
+                return false;
             }
         });
         return task;
@@ -41,9 +42,20 @@ define([], function(){
         };
     }
 
-    function isInsideBoundaries(boundary, x, y) {
-        return boundary.left < x && x < boundary.right &&
-                boundary.top < y && y < boundary.bottom;
+    function boundariesIntersect(b1, b2) {
+        var o = overlap(b1, b2);
+        return o.x > 0 && o.y > 0;
+    }
+
+    function overlap(b1, b2) {
+        return {
+            x: (b1.left < b2.left) ? b1.right - b2.left : b2.right - b1.left,
+            y: (b1.top < b2.top) ? b1.bottom - b2.top : b2.bottom - b1.top
+        };
+    }
+
+    function isInsideBoundary(b, x, y) {
+        return b.left < x && x < b.right && b.top < y && y < b.bottom;
     }
 
     return publicProps;

@@ -106,7 +106,7 @@ define([
             getProps: function(){
                 var props = {
                         "title": this.$("#edit-task-title").val(),
-                        "priority": this.$("#edit-task-priority").val(),
+                        "priority": parseInt(this.$("#edit-task-priority").val(), 10),
                         "notes": this.$("#edit-task-notes").val(),
                         "status": this.$(".is-exclusive.is-selected").attr("data-value"),
                         "critical": this.$(".status-icon.critical").hasClass("is-selected"),

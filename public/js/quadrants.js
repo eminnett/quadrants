@@ -1,6 +1,9 @@
 // The core Quadrants application object.
 //
-// ToDo: Add functionality to sort tasks manually (by dragging), by status, by date and alphabetically.
+// ToDo: Fix sorting while dragging bug.
+// ToDo: Animate task position changes (buggy on first attempt);
+// ToDo: Add functionality to sort by status, by date and alphabetically.
+// ToDo: Cleanup and comment code.
 // ToDo: Refactor to use logicless templates.
 // ToDo: Be able to handle page refresh from any URL.
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
@@ -112,6 +115,7 @@ define([
         taskView.on(interactionManager.TAP, function(e){
             populateEditView(e.view.model);
         });
+        taskView.on(interactionManager.DRAG_START, onTaskDragStart);
         taskView.on(interactionManager.DRAG, onTaskDrag);
         taskView.on(interactionManager.DROP, onTaskDrop);
         taskView.on(taskView.DELETE, onDelete);
@@ -121,8 +125,7 @@ define([
     // and archived state.
     //
     // ToDo:    Refactor logic to better model the user's expectations
-    //          for how the filter works. Consider creating a filter
-    //          management object.
+    //          for how the filter works. Move filtering in the TaskList view.
     function filterTasks(type) {
         var selectedFilters, targetTasks, nonTargetTasks,
             booleanFilters = ["critical", "archived", "unarchived"],
@@ -211,9 +214,18 @@ define([
         $cache.tasks = $(".task");
     }
 
+    // Handle starting to drag a task.
+    function onTaskDragStart(e){
+        var taskView = e.view,
+            priority = parseInt(taskView.model.get("priority"), 10),
+            taskList = _.where(taskLists, {priority: priority})[0];
+        taskList.view.remove(taskView, true);
+    }
+
     // Handle dragging a task.
     function onTaskDrag(e){
-        var target, targetQuadrant, hitTestTasks, offset, boundary,
+        var target, targetQuadrant, priority, taskList,
+            dTaskboundary, taskHeight,
             taskView = e.view;
             
         //if (taskView.$el.hasClass("is-dragging")) { //class not working as expected yet
@@ -223,41 +235,53 @@ define([
                     $(".quadrant.drop-target").removeClass("drop-target");
                     targetQuadrant.addClass("drop-target");
                 }
-                boundary = dragHelper.getBoundary(taskView.$el);
-                $(".task.drop-target").removeClass("drop-target");
-                hitTestTasks = dragHelper.getTaskAtPoint(targetQuadrant, boundary.left, boundary.top)
-                    .add(dragHelper.getTaskAtPoint(targetQuadrant, boundary.right, boundary.top))
-                    .add(dragHelper.getTaskAtPoint(targetQuadrant, boundary.left, boundary.bottom))
-                    .add(dragHelper.getTaskAtPoint(targetQuadrant, boundary.right, boundary.bottom));
-                hitTestTasks.addClass("drop-target");
+                priority = parseInt(targetQuadrant.attr("data-priority"), 10);
+                dTaskboundary = dragHelper.getBoundary(taskView.$el);
+                taskHeight = dTaskboundary.bottom - dTaskboundary.top;
+                taskList = _.where(taskLists, {priority: priority})[0];
+                _.each(taskList.view.tasks, function(iterTask){
+                    var tTaskBoundary = dragHelper.getBoundary(iterTask.$el);
+                    if( dragHelper.boundariesIntersect(dTaskboundary, tTaskBoundary) ) {
+                        if( dTaskboundary.top < tTaskBoundary.top ) {
+                            taskList.view.makeSpaceAt(iterTask.model.get("order"));
+                        } else {
+                            taskList.view.makeSpaceAt(iterTask.model.get("order") + 1);
+                        }
+                    }
+                });
+                _.each(taskLists, function(taskList){
+                    if(taskList.priority !== priority)
+                        taskList.view.removeSpace();
+                });
             } else {
-                $(".task.drop-target").removeClass("drop-target");
+                _.each(taskLists, function(taskList){
+                    taskList.view.removeSpace();
+                });
                 $(".quadrant.drop-target").removeClass("drop-target");
             }
         //}
     }
 
     // Handle dropping a task into a new quadrant.
-    // ToDo: This needs to integrate with the TaskList views.
     function onTaskDrop(e) {
-        var task = e.view.model,
+        var priority, dropTarget,
+            task = e.view.model,
             dropElement = document.elementFromPoint( e.pos.x, e.pos.y ),
-            targetQuadrant = $(dropElement).parents(".quadrant"),
-            dropTarget = targetQuadrant.find(".task-list"),
-            priority = targetQuadrant.attr("data-priority");
-
-        $(".drop-target").removeClass("drop-target");
-
-        if(dropTarget.length > 0) {
+            targetQuadrant = $(dropElement).parents(".quadrant");
+            
+        if(targetQuadrant.length > 0) {
+            priority = parseInt(targetQuadrant.attr("data-priority"), 10);
+            dropTarget = _.where(taskLists, {priority: priority})[0].view;
+            targetQuadrant.removeClass("drop-target");
             task.set("priority", priority);
-            if( priority !== "0")
+            if( priority !== 0)
                 task.set("critical", false);
             task.save();
         } else {
-            targetQuadrant = $(".quadrant[data-priority='" + task.get("priority")+ "']");
-            dropTarget = targetQuadrant.find(".task-list");
+            dropTarget = _.where(taskLists, {priority: task.get("priority")})[0].view;
         }
-        dropTarget.prepend(e.view.$el);
+        dropTarget.insert(e.view, dropTarget.space);
+        dropTarget.removeSpace();
     }
 
     // Initialize is the only public method.

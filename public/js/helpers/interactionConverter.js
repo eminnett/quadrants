@@ -102,7 +102,7 @@ define(["jquery", "underscore"], function($, _){
             }
 
             now = new Date().getTime(),
-            newDelay = Math.max(10, 1000 / props.frameRate - (now - prevIntervalTime));
+            newDelay = Math.max(30, 1000 / props.frameRate - (now - prevIntervalTime));
             timer = setTimeout(onInterval, newDelay);
         }
 

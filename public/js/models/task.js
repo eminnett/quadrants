@@ -3,8 +3,8 @@ define(["underscore", "backbone"], function(_, Backbone) {
         url: "/task",
         defaults : {
             title: "Default Title",
-            priority: "0",
-            order: "0",
+            priority: 0,
+            order: 0,
             date: "",
             notes: "",
             status: "none",
@@ -17,6 +17,10 @@ define(["underscore", "backbone"], function(_, Backbone) {
                 response = JSON.parse(response);
             response.id = response._id.$oid;
             return response;
+        },
+        validate: function(attributes){
+            if(_.isString(attributes.priority))
+                this.set("priority", parseInt(attributes.priority, 10));
         }
     });
 
