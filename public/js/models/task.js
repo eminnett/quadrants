@@ -4,7 +4,7 @@ define(["underscore", "backbone"], function(_, Backbone) {
         defaults : {
             title: "Default Title",
             priority: 0,
-            order: 0,
+            order: undefined,
             date: "",
             notes: "",
             status: "none",

@@ -25,7 +25,11 @@ define([
                 this.render();
                 return this;
             },
-            render: function(){
+            render: function(e){
+                if(this.model.hasChanged('order')){
+                    var order = this.model.get("order");
+                    console.log("order changed");
+                }
                 this.$el.html( template( { id: this.model.id, task:this.model.toJSON() }) );
                 return this;
             },

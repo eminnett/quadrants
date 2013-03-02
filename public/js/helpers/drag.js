@@ -1,11 +1,13 @@
+//Helper functions related to dragging.
 define([], function(){
     var publicProps = {
             getQuadrantAtPoint: getQuadrantAtPoint,
-            getTaskAtPoint: getTaskAtPoint,
             getBoundary: getBoundary,
             boundariesIntersect: boundariesIntersect
         };
 
+    // Returns the jQuery wrapper for a quadrant
+    // element at a given set of coordiantes.
     function getQuadrantAtPoint(x, y) {
         var offset, boundary,
             quadrant = $();
@@ -19,34 +21,25 @@ define([], function(){
         return quadrant;
     }
 
-    function getTaskAtPoint(quadrant, x, y) {
-        var offset, boundary,
-            task = $();
-        quadrant.find(".task").each(function(){
-            boundary = getBoundary($(this));
-            if( isInsideBoundary(boundary, x, y) ) {
-                task = $(this);
-                return false;
-            }
-        });
-        return task;
-    }
-
-    function getBoundary(element) {
-        var offset = element.offset();
+    // Returns the boundary of a jQuery element.
+    function getBoundary(jQEl) {
+        var offset = jQEl.offset();
         return {
             left: offset.left,
-            right: offset.left + element.width(),
+            right: offset.left + jQEl.width(),
             top: offset.top,
-            bottom: offset.top + element.height()
+            bottom: offset.top + jQEl.height()
         };
     }
 
+    // Determines if two boundaries intersect.
     function boundariesIntersect(b1, b2) {
         var o = overlap(b1, b2);
         return o.x > 0 && o.y > 0;
     }
 
+    // Returns the amount of overlap between two 
+    // boundaries. Negative values imply no overlap.
     function overlap(b1, b2) {
         return {
             x: (b1.left < b2.left) ? b1.right - b2.left : b2.right - b1.left,
@@ -54,6 +47,7 @@ define([], function(){
         };
     }
 
+    // Determines if a set of coordiantes are inside a boundary.
     function isInsideBoundary(b, x, y) {
         return b.left < x && x < b.right && b.top < y && y < b.bottom;
     }

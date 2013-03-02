@@ -1,11 +1,12 @@
 // The core Quadrants application object.
 //
-// ToDo: Fix sorting while dragging bug.
-// ToDo: Animate task position changes (buggy on first attempt);
-// ToDo: Add functionality to sort by status, by date and alphabetically.
-// ToDo: Cleanup and comment code.
-// ToDo: Refactor to use logicless templates.
-// ToDo: Be able to handle page refresh from any URL.
+// ToDo: Animate task position changes (buggy on first attempt); *
+// ToDo: Add functionality to sort by status, by date and alphabetically. *
+// ToDo: Fix filtering. *
+// ToDo: Cleanup and comment code. *
+// ToDo: Refactor to use logicless templates. *
+// ToDo: Be able to handle page refresh from any URL. *
+// ToDo: Package for GitHub as a marketable portfolio piece. ^ *
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
 // ToDo: Add date support.
 // ToDo: Create (or at least begin creating) a responsive layout.
@@ -93,14 +94,21 @@ define([
     function regCollectionListeners() {
         tasksCollection.on('reset', function(e){
             _.each(e.models, function(model){
-                var taskView = new TaskView({model: model}),
-                    priority = parseInt(model.get("priority"), 10);
+                var taskList,
+                    taskView = new TaskView({model: model}),
+                    order = model.get("order"),
+                    priority = parseInt(model.get("priority"), 10),
+                    insertOptions = {shiftTasks: !_.isUndefined(order), arrangeTasks: false};
                 regTaskListeners(taskView);
                 taskViews[model.cid] = taskView;
                 interactionManager.registerView(taskView);
-                _.where(taskLists, {priority: priority})[0].view.insert(taskView);
+                taskList = _.where(taskLists, {priority: priority})[0];
+                taskList.view.insert(taskView, order, insertOptions);
             });
             $cache.tasks = $(".task");
+            _.each(taskLists, function(taskList){
+                taskList.view.fixOrder();
+            });
         });
     }
 
@@ -276,12 +284,12 @@ define([
             task.set("priority", priority);
             if( priority !== 0)
                 task.set("critical", false);
-            task.save();
         } else {
             dropTarget = _.where(taskLists, {priority: task.get("priority")})[0].view;
         }
-        dropTarget.insert(e.view, dropTarget.space);
+        dropTarget.insert(e.view, dropTarget.space, {arrangeTasks: false});
         dropTarget.removeSpace();
+        dropTarget.saveTasks();
     }
 
     // Initialize is the only public method.
