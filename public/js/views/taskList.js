@@ -27,18 +27,16 @@ define([
             insert: function(task, index, options){
                 var order = (_.isUndefined(index)) ? _.keys(this.tasks).length : index;
                 
-                // shiftFrom needs to be supressable for the order to be persistent.
-                // causes infinite loop!?
-                // if(_.isUndefined(options) || options.shiftTasks ) {
-                    if(!_.isUndefined(index))
+                if(!_.isUndefined(index) &&
+                    (_.isUndefined(options.shiftTasks) || options.shiftTasks)) {
                         this.shiftFrom(order, this.UP);
-                // }
+                }
                 
                 task.model.set("order", order);
                 this.taskList.append(task.$el);
                 this.tasks[task.cid] = task;
                 
-                if(_.isUndefined(options) || options.arrangeTasks)
+                if(_.isUndefined(options.arrangeTasks) || options.arrangeTasks)
                     this.arrangeTasks();
             },
             remove: function(task, withSpace){

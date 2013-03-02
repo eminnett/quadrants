@@ -1,4 +1,4 @@
-define(["underscore", "backbone"], function(_, Backbone) {
+define(["backbone"], function(Backbone) {
     var TaskModel = Backbone.Model.extend({
         url: "/task",
         defaults : {

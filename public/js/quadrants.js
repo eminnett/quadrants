@@ -14,7 +14,6 @@
 // ToDo: Test.
 define([
     "jquery",
-    "underscore",
     "backbone",
     "router",
     "managers/userInteraction",
@@ -23,9 +22,9 @@ define([
     "views/taskList",
     "views/task",
     "helpers/drag"
-], function($, _, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskListView, TaskView, dragHelper){
+], function($, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskListView, TaskView, dragHelper){
     var router, interactionManager, taskListManager, tasksCollection,
-        editTaskView, taskLists, taskViews, swipedTask, $cache;
+        editTaskView, taskLists, taskViews, swipedTask;
     
     function initialize() {
         router = new Router();
@@ -33,12 +32,10 @@ define([
         tasksCollection = new TasksCollection();
         editTaskView = new EditTaskView();
         taskViews = {};
-        $cache = {};
 
         interactionManager.initialize();
 
         instantiateTaskLists();
-        cacheElements();
         regJQListeners();
         regRouterListeners();
         regCollectionListeners();
@@ -62,12 +59,6 @@ define([
         halfs.filter(".top").find(".quadrant.right").append(taskLists.topRight.view.$el);
         halfs.filter(".bottom").find(".quadrant.left").append(taskLists.bottomLeft.view.$el);
         halfs.filter(".bottom").find(".quadrant.right").append(taskLists.bottomRight.view.$el);
-    }
-
-    // Caches jQuery objects for later use. Queries that
-    // require updating are defined where appropriate.
-    function cacheElements() {
-        $cache.filters = $(".filter .status-icon");
     }
 
     function regJQListeners() {
@@ -105,7 +96,6 @@ define([
                 taskList = _.where(taskLists, {priority: priority})[0];
                 taskList.view.insert(taskView, order, insertOptions);
             });
-            $cache.tasks = $(".task");
             _.each(taskLists, function(taskList){
                 taskList.view.fixOrder();
             });
@@ -137,9 +127,10 @@ define([
     function filterTasks(type) {
         var selectedFilters, targetTasks, nonTargetTasks,
             booleanFilters = ["critical", "archived", "unarchived"],
-            targetFilter = $cache.filters.filter("." + type);
+            filterIcons = $(".filter .status-icon");
+            targetFilter = filterIcons.filter("." + type);
         targetFilter.toggleClass("is-selected");
-        selectedFilters = $cache.filters.filter(".is-selected");
+        selectedFilters = filterIcons.filter(".is-selected");
 
         if(_.contains(booleanFilters, type)) {
             if(type === "critical") {
@@ -200,7 +191,6 @@ define([
         taskViews[e.model.cid] = taskView;
         interactionManager.registerView(taskView);
         regTaskListeners(taskView);
-        $cache.tasks = $(".task");
     }
 
     // Handle saving a task.
@@ -217,9 +207,8 @@ define([
             taskView = taskViews[task.cid];
         interactionManager.unregisterView(taskView);
         delete taskViews[task.cid];
-        task.destroy({url: task.url+"/"+task.id});
         taskView.remove();
-        $cache.tasks = $(".task");
+        task.destroy({url: task.url+"/"+task.id});
     }
 
     // Handle starting to drag a task.
@@ -233,41 +222,49 @@ define([
     // Handle dragging a task.
     function onTaskDrag(e){
         var target, targetQuadrant, priority, taskList,
-            dTaskboundary, taskHeight,
+            dTaskBoundary, taskHeight,
             taskView = e.view;
             
         //if (taskView.$el.hasClass("is-dragging")) { //class not working as expected yet
             targetQuadrant = dragHelper.getQuadrantAtPoint(e.pos.x, e.pos.y);
             if(targetQuadrant.length > 0) {
-                if(!targetQuadrant.hasClass("drop-target")){
-                    $(".quadrant.drop-target").removeClass("drop-target");
-                    targetQuadrant.addClass("drop-target");
-                }
                 priority = parseInt(targetQuadrant.attr("data-priority"), 10);
-                dTaskboundary = dragHelper.getBoundary(taskView.$el);
-                taskHeight = dTaskboundary.bottom - dTaskboundary.top;
+                dTaskBoundary = dragHelper.getBoundary(taskView.$el);
+                taskHeight = dTaskBoundary.bottom - dTaskBoundary.top;
                 taskList = _.where(taskLists, {priority: priority})[0];
+                
+                handleQuadrantClass(targetQuadrant);
+                
                 _.each(taskList.view.tasks, function(iterTask){
                     var tTaskBoundary = dragHelper.getBoundary(iterTask.$el);
-                    if( dragHelper.boundariesIntersect(dTaskboundary, tTaskBoundary) ) {
-                        if( dTaskboundary.top < tTaskBoundary.top ) {
+                    if( dragHelper.boundariesIntersect(dTaskBoundary, tTaskBoundary) ) {
+                        if( dTaskBoundary.top < tTaskBoundary.top ) {
                             taskList.view.makeSpaceAt(iterTask.model.get("order"));
                         } else {
                             taskList.view.makeSpaceAt(iterTask.model.get("order") + 1);
                         }
                     }
                 });
-                _.each(taskLists, function(taskList){
-                    if(taskList.priority !== priority)
-                        taskList.view.removeSpace();
-                });
+                resetTaskListSpaces(priority);
             } else {
-                _.each(taskLists, function(taskList){
-                    taskList.view.removeSpace();
-                });
+                resetTaskListSpaces();
                 $(".quadrant.drop-target").removeClass("drop-target");
             }
         //}
+        
+        function handleQuadrantClass(targetQuadrant){
+            if(!targetQuadrant.hasClass("drop-target")){
+                $(".quadrant.drop-target").removeClass("drop-target");
+                targetQuadrant.addClass("drop-target");
+            }
+        }
+
+        function resetTaskListSpaces(priority){
+            _.each(taskLists, function(taskList){
+                if(_.isUndefined(priority) || priority !== taskList.priority)
+                    taskList.view.removeSpace();
+            });
+        }
     }
 
     // Handle dropping a task into a new quadrant.
