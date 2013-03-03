@@ -1,45 +1,9 @@
 <div class="bottom-layer">
-	<div class="status-options">
-		<div class="status-icon is-interactive is-exclusive none 
-			{{#ifEqual task.status 'none'}}is-selected{{/ifEqual}}"
-			data-value="none"></div>
-		<div class="status-icon is-interactive is-exclusive pending 
-			{{#ifEqual task.status 'pending'}}is-selected{{/ifEqual}}"
-			data-value="pending"></div>
-		<div class="status-icon is-interactive is-exclusive started 
-			{{#ifEqual task.status 'started'}}is-selected{{/ifEqual}}"
-			data-value="started"></div>
-		<div class="status-icon is-interactive is-exclusive complete 
-			{{#ifEqual task.status 'complete'}}is-selected{{/ifEqual}}"
-			data-value="complete"></div>
-		<div class="status-icon is-interactive critical 
-			{{#if task.critical}}is-selected{{/if}}
-			{{#ifNotEqual task.priority '0'}}is-hidden{{/ifNotEqual}}"></div>
-	</div>
-	<div class="actions">
-		{{#if task.archived}}
-            <div class="action button is-interactive unarchive"></div>
-        {{else}}
-			<div class="action button is-interactive archive"></div>
-        {{/if}}
-		<div class="action button is-interactive delete"></div>
-	</div>
+	<div class="status-options">{{{statusOptionsMarkup}}}</div>
+	<div class="actions">{{{actionsMarkup}}}</div>
 </div>
 <div class="top-layer">
-	<div class="status">
-		<div class="status-icon none is-selected 
-			{{#ifNotEqual task.status 'none'}}is-hidden{{/ifNotEqual}}"></div>
-		<div class="status-icon pending is-selected 
-			{{#ifNotEqual task.status 'pending'}}is-hidden{{/ifNotEqual}}"></div>
-		<div class="status-icon started is-selected 
-			{{#ifNotEqual task.status 'started'}}is-hidden{{/ifNotEqual}}"></div>
-		<div class="status-icon complete is-selected 
-			{{#ifNotEqual task.status 'complete'}}is-hidden{{/ifNotEqual}}"></div>
-		<div class="status-icon critical is-selected 
-			{{#ifEqual task.critical false}}is-hidden{{/ifEqual}}"></div>
-	</div>
-	<div class="title">
-		{{task.title}}
-	</div>
+	<div class="status">{{{statusMarkup}}}</div>
+	<div class="title">{{task.title}}</div>
 	<div class="drag-affordance"></div>
 </div>

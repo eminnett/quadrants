@@ -12,6 +12,7 @@
 // ToDo: Create (or at least begin creating) a responsive layout.
 // ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
 // ToDo: Test.
+// ToDo: Make wishlist for next round of development.
 define([
     "jquery",
     "backbone",

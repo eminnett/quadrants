@@ -1,11 +1,10 @@
 define([
     "backbone",
     "models/task",
-    "libs/text!templates/editTask.html"
-], function(Backbone, TaskModel, editTaskTemplate){
+    "helpers/templates"
+], function(Backbone, TaskModel, TemplateHelper){
 
-    var template = Handlebars.compile( editTaskTemplate ),
-        EditTaskView = Backbone.View.extend({
+    var EditTaskView = Backbone.View.extend({
             NEW_TASK: "NEW_TASK",
             SAVE_TASK: "SAVE_TASK",
             DELETE_TASK: "DELETE_TASK",
@@ -14,9 +13,11 @@ define([
             events: {
                 "change #edit-task-priority": "toggleCritical",
                 "click .status-icon": "changeStatus",
-                "click #save-task": "saveTask",
-                "click #toggle-archive": "toggleArchive",
-                "click #delete-task": "deleteTask",
+                "click .button.save": "saveTask",
+                "click .button.archive": "toggleArchive",
+                "click .button.unarchive": "toggleArchive",
+                "click .button.delete": "deleteTask",
+                "click .button.cancel": "deleteTask",
                 "click .mask": "cancelEdit"
             },
             initialize: function(){
@@ -26,7 +27,7 @@ define([
             render: function(task){
                 var isNew = task === undefined;
                 this.task = isNew ? new TaskModel() : task;
-                this.$el.html( template( {isNew: isNew, task: this.task.toJSON()} ) );
+                this.$el.html( TemplateHelper.populateEditTaskTemplate(isNew, this.task) );
                 this.openModal();
                 if( isNew )
                     this.trigger(this.NEW_TASK, {model: this.task});
@@ -89,7 +90,7 @@ define([
                 return this;
             },
             toggleArchive: function(){
-                var archivalButton = this.$("#toggle-archive");
+                var archivalButton = this.$(".button.archive, .button.unarchive");
                 archivalButton.toggleClass("unarchive").toggleClass("archive");
                 if(archivalButton.hasClass("unarchive"))
                     archivalButton.text("Unarchive");
@@ -110,7 +111,7 @@ define([
                         "notes": this.$("#edit-task-notes").val(),
                         "status": this.$(".is-exclusive.is-selected").attr("data-value"),
                         "critical": this.$(".status-icon.critical").hasClass("is-selected"),
-                        "archived": this.$("#toggle-archive").hasClass("unarchive")
+                        "archived": this.$(".button.archive, .button.unarchive").hasClass("unarchive")
                     };
 
                 _.each(props, function(v, k){

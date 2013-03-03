@@ -1,66 +1,26 @@
 <div class="modal-window-wrapper">
     <div class="mask"></div>
     <div class="modal-window edit-task-container">
-        <div class="title">
-            {{#if isNew}}
-                New task
-            {{else}}
-                Edit Task
-            {{/if}}
-        </div>
+        <div class="title">{{title}}</div>
         <div class="settings">
-            <div class="status-options">
-                <div class="status-icon is-exclusive is-interactive has-label none 
-                    {{#ifEqual task.status 'none'}}is-selected{{/ifEqual}}"
-                    data-value="none">No status</div>
-                <div class="status-icon is-exclusive is-interactive has-label pending 
-                    {{#ifEqual task.status 'pending'}}is-selected{{/ifEqual}}"
-                    data-value="pending">Pending</div>
-                <div class="status-icon is-exclusive is-interactive has-label started 
-                    {{#ifEqual task.status 'started'}}is-selected{{/ifEqual}}"
-                    data-value="started">Started</div>
-                <div class="status-icon is-exclusive is-interactive has-label complete 
-                    {{#ifEqual task.status 'complete'}}is-selected{{/ifEqual}}"
-                    data-value="complete">Complete</div>
-                <div class="status-icon critical is-interactive has-label
-                    {{#if task.critical}}is-selected{{/if}} 
-                    {{#ifNotEqual task.priority '0'}}is-hidden{{/ifNotEqual}}">Critical</div>
-            </div>
+            <div class="status-options">{{{statusOptionsMarkup}}}</div>
             <div class="inputs">
                 <input type="text" id="edit-task-title" value="{{task.title}}" placeholder="Title..." />
                 <select id="edit-task-priority" value="{{task.priority}}">
-                    <option value="0" {{#ifEqual task.priority '0'}}selected="selected"{{/ifEqual}}>
-                        Urgent and Important
-                    </option>
-                    <option value="1" {{#ifEqual task.priority '1'}}selected="selected"{{/ifEqual}}>
-                        Not Urgent but Important
-                    </option>
-                    <option value="2" {{#ifEqual task.priority '2'}}selected="selected"{{/ifEqual}}>
-                        Urgent but Not Important
-                    </option>
-                    <option value="3" {{#ifEqual task.priority '3'}}selected="selected"{{/ifEqual}}>
-                        Neither Urgent nor Important</option>
+                    {{{selectOptionsMarkup}}}
                 </select>
                 <textarea id="edit-task-notes" placeholder="Notes...">{{task.notes}}</textarea>
             </div>
         </div>
         <div class="actions">
             <div class="action-wrapper first">
-                <div class="button is-interactive has-label save" id="save-task">Save</div>
+                {{{saveButtonMarkup}}}
             </div>
             <div class="action-wrapper">
-            {{#if task.archived}}
-                <div class="button is-interactive has-label unarchive" id="toggle-archive">Unarchive</div>
-            {{else}}
-                <div class="button is-interactive has-label archive" id="toggle-archive">Archive</div>
-            {{/if}}
+                {{{archiveButtonMarkup}}}
             </div>
             <div class="action-wrapper last">
-                {{#if isNew}}
-                    <div class="button is-interactive has-label cancel" id="delete-task">Cancel</div>
-                {{else}}
-                    <div class="button is-interactive has-label delete" id="delete-task">Delete</div>
-                {{/if}}
+                {{{deleteButtonMarkup}}}
             </div>
         </div>
     </div>

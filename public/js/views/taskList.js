@@ -1,9 +1,10 @@
 define([
     "backbone",
+    "mustache",
     "libs/text!templates/taskList.html"
-], function(Backbone, taskListTemplate){
+], function(Backbone, Mustache, taskListTemplate){
 
-    var template = Handlebars.compile( taskListTemplate ),
+    var template = Mustache.compile( taskListTemplate ),
         TaskListView = Backbone.View.extend({
             UP: "shift_task_order_up",
             DOWN: "shift_task_order_down",

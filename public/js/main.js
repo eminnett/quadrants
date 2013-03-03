@@ -8,21 +8,20 @@ require.config({
             deps: ["jquery", "underscore"],
             exports: "Backbone"
         },
-        "handlebars": {
-            exports: "Handlebars"
+        "mustache": {
+            exports: "Mustache"
         }
     },
     paths: {
         "jquery": "libs/jquery",
         "underscore": "libs/underscore",
         "backbone": "libs/backbone",
-        "handlebars": "libs/handlebars"
+        "mustache": "libs/mustache"
     }
 
 });
 
 //Initialize the quadrants app.
-require(["helpers/handlebars", "quadrants"], function(handlebarsHelpers, Q){
-    handlebarsHelpers();
+require(["quadrants"], function(Q){
     Q.initialize();
 });

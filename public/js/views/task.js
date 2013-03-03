@@ -1,10 +1,9 @@
 define([
     "backbone",
-    "libs/text!templates/task.html"
-], function(Backbone, taskTemplate){
+    "helpers/templates"
+], function(Backbone, TemplateHelper){
 
-    var template = Handlebars.compile( taskTemplate ),
-        TaskView = Backbone.View.extend({
+    var TaskView = Backbone.View.extend({
             DELETE: "task_delete",
             className: "task",
             events: {
@@ -26,11 +25,7 @@ define([
                 return this;
             },
             render: function(e){
-                if(this.model.hasChanged('order')){
-                    var order = this.model.get("order");
-                    console.log("order changed");
-                }
-                this.$el.html( template( { id: this.model.id, task:this.model.toJSON() }) );
+                this.$el.html(TemplateHelper.populateTaskTemplate(this.model));
                 return this;
             },
             // Returns the swiping element. Used by the InteractionManager.
