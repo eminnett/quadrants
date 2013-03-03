@@ -17,6 +17,7 @@ define([
                 this.spacing = 10;
                 this.taskHeight = 50;
                 this.space = undefined;
+                this.hiddenOrders = [];
                 this.render();
                 return this;
             },
@@ -39,12 +40,14 @@ define([
                 
                 if(_.isUndefined(options.arrangeTasks) || options.arrangeTasks)
                     this.arrangeTasks();
+
+                return this;
             },
             remove: function(task, withSpace){
                 var order = task.model.get("order");
                 
                 if(_.isUndefined(this.tasks[task.cid]))
-                    return;
+                    return this;
 
                 delete this.tasks[task.cid];
                 this.shiftFrom(order, this.DOWN);
@@ -53,6 +56,8 @@ define([
                     this.makeSpaceAt(order);
                 else
                     this.arrangeTasks();
+
+                return this;
             },
             // Recursively ensures the order of tasks is
             // sequential and without gaps.
@@ -71,12 +76,13 @@ define([
     
                 if( _.range(indices.length).toString() === indices.toString()) {
                     this.arrangeTasks();
+                    return this;
                 } else {
                     for(i; i < indices.length; i++){
                         if(indices[i] !== i){
                             shiftDirection = (i < indices[i]) ? this.DOWN : this.UP;
                             this.fixOrder(this.shiftFrom(i,shiftDirection));
-                            return;
+                            return this;
                         }
                     }
                 }
@@ -97,28 +103,69 @@ define([
             makeSpaceAt: function(index){
                 this.space = index;
                 this.arrangeTasks();
+                return this;
             },
             removeSpace: function(){
                 if(_.isUndefined(this.space))
-                    return;
+                    return this;
                 this.space = undefined;
                 this.arrangeTasks();
+
+                return this;
             },
             arrangeTasks: function(){
                 _.each(this.tasks, this.positionTask);
+                return this;
             },
             positionTask: function(task){
                 var order = task.model.get("order"),
-                    index = (_.isUndefined(this.space) || this.space > order) ? order : order + 1;
+                    numHiddenBellow = _.sortedIndex(this.hiddenOrders, order),
+                    visIdx = order - numHiddenBellow,
+                    index = (_.isUndefined(this.space) || this.space > visIdx) ? visIdx : visIdx + 1,
                     position = index * (this.taskHeight + this.spacing);
                 //task.$el.animate({"top": position}); //animation is buggy
                 task.$el.css({"top": position + "px"});
+            },
+            filterTasks: function(filters){
+                var hidden = this.hiddenOrders = [];
+                
+                if( filters.length === 0 ){
+                    this.taskList.find(".task.is-hidden").removeClass("is-hidden");
+                } else {
+                    _.each(this.tasks, function(task){
+                        var taskArchived = task.model.get("archived"),
+                            noArchiveFilter = _.intersection(filters, ["archived", "unarchived"]).length === 0,
+                            isFiltered = noArchiveFilter ||
+                                (_.contains(filters, "archived") && taskArchived) ||
+                                (_.contains(filters, "unarchived") && !taskArchived);
+
+                        if((filters.length > 1 || noArchiveFilter) && isFiltered){
+                            isFiltered = _.contains(filters, task.model.get("status")) ||
+                                (_.contains(filters, "critical") && task.model.get("critical"));
+                        }
+
+                        if(isFiltered){
+                            task.$el.removeClass("is-hidden");
+                        } else {
+                            task.$el.addClass("is-hidden");
+                            hidden.push(task.model.get("order"));
+                        }
+                    });
+                    this.hiddenOrders = hidden.sort();
+                }
+
+                this.arrangeTasks();
+                return this;
+            },
+            sortTasks: function(type){
+
             },
             // ToDo: Refactor this to use a single server request.
             saveTasks: function(){
                 _.each(this.tasks, function(task){
                     task.model.save();
                 });
+                return this;
             }
         });
 

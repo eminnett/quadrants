@@ -18,19 +18,19 @@
                     Filters:
                 .filters
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/none"}
-                        %span.status-icon.is-interactive.none
+                        %span.status-icon.is-interactive.none{:"data-filter" => "none"}
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/pending"}
-                        %span.status-icon.is-interactive.pending
+                        %span.status-icon.is-interactive.pending{:"data-filter" => "pending"}
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/started"}
-                        %span.status-icon.is-interactive.started
+                        %span.status-icon.is-interactive.started{:"data-filter" => "started"}
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/complete"}
-                        %span.status-icon.is-interactive.complete
+                        %span.status-icon.is-interactive.complete{:"data-filter" => "complete"}
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/critical"}
-                        %span.status-icon.is-interactive.critical
+                        %span.status-icon.is-interactive.critical{:"data-filter" => "critical"}
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/archived"}
-                        %span.status-icon.is-interactive.archived
+                        %span.status-icon.is-interactive.archived{:"data-filter" => "archived"}
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/unarchived"}
-                        %span.status-icon.is-interactive.unarchived
+                        %span.status-icon.is-interactive.unarchived{:"data-filter" => "unarchived"}
             .button.has-label.is-interactive.add
                 New task
         .quadrants

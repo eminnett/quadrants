@@ -2,9 +2,7 @@
 //
 // ToDo: Animate task position changes (buggy on first attempt); *
 // ToDo: Add functionality to sort by status, by date and alphabetically. *
-// ToDo: Fix filtering. *
 // ToDo: Cleanup and comment code. *
-// ToDo: Refactor to use logicless templates. *
 // ToDo: Be able to handle page refresh from any URL. *
 // ToDo: Package for GitHub as a marketable portfolio piece. ^ *
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
@@ -122,57 +120,27 @@ define([
 
     // Handles the filtering of tasks based on status, criticality
     // and archived state.
-    //
-    // ToDo:    Refactor logic to better model the user's expectations
-    //          for how the filter works. Move filtering in the TaskList view.
     function filterTasks(type) {
-        var selectedFilters, targetTasks, nonTargetTasks,
-            booleanFilters = ["critical", "archived", "unarchived"],
-            filterIcons = $(".filter .status-icon");
+        var selectedFilterIcons,
+            selectedFilters = [],
+            filterIcons = $(".filter .status-icon"),
             targetFilter = filterIcons.filter("." + type);
         targetFilter.toggleClass("is-selected");
-        selectedFilters = filterIcons.filter(".is-selected");
 
-        if(_.contains(booleanFilters, type)) {
-            if(type === "critical") {
-                targetTasks = _.filter(tasksCollection.models, function(model){
-                    return model.get(type);
-                });
-            } else {
-                targetTasks = _.filter(tasksCollection.models, function(model){
-                    if(type.indexOf("un") < 0)
-                        return model.get("archived");
-                    else
-                        return !model.get("archived");
-                });
-            }
-        } else {
-            targetTasks = tasksCollection.where({status: type});
-        }
-        nonTargetTasks = _.reject(tasksCollection.models, function(model){
-            return _.contains(targetTasks, model);
+        if(type === "archived")
+            filterIcons.filter(".unarchived").removeClass("is-selected");
+        else if(type === "unarchived")
+            filterIcons.filter(".archived").removeClass("is-selected");
+
+        selectedFilterIcons = filterIcons.filter(".is-selected");
+
+        selectedFilterIcons.each(function(i, filterIcon){
+            selectedFilters.push($(filterIcon).attr("data-filter"));
         });
-        if(selectedFilters.length > 0) {
-            if(selectedFilters.length === 1 && targetFilter.hasClass("is-selected")){
-                _.each(nonTargetTasks, function(model){
-                    taskViews[model.cid].$el.addClass("is-hidden");
-                });
-            } else {
-                if(targetFilter.hasClass("is-selected")){
-                    _.each(targetTasks, function(model){
-                        taskViews[model.cid].$el.removeClass("is-hidden");
-                    });
-                } else {
-                    _.each(targetTasks, function(model){
-                        taskViews[model.cid].$el.addClass("is-hidden");
-                    });
-                }
-            }
-        } else {
-            _.each(taskViews, function(view){
-                view.$el.removeClass("is-hidden");
-            });
-        }
+
+        _.each(taskLists, function(taskList){
+            taskList.view.filterTasks(selectedFilters);
+        });
 
         // Immediately navigate back to root to minimize issues with LiveReload.
         router.navigate( "/", {trigger: false} );
