@@ -25,7 +25,6 @@ define([
         editTaskView, taskLists, taskViews, swipedTask;
     
     function initialize() {
-        var initialRoute = $.trim($("#route").attr("data-route"));
         router = new Router();
         interactionManager = new InteractionManager();
         tasksCollection = new TasksCollection();
@@ -43,10 +42,7 @@ define([
         $("body").append(editTaskView.$el);
         Backbone.history.start({pushState: true, root: '/'});
 
-        // If the app loads with a requested route passed from
-        // Sinatra, the router will navigate to the route.
-        if(initialRoute.length > 0 && initialRoute !== '/')
-            router.navigate( '/' + $("#route").attr("data-route") );
+        navigateToInitialRoute();
     }
 
     // Creates a task list for each quadrant and inserts the html.
@@ -122,6 +118,14 @@ define([
         taskView.on(interactionManager.DRAG, onTaskDrag);
         taskView.on(interactionManager.DROP, onTaskDrop);
         taskView.on(taskView.DELETE, onDelete);
+    }
+
+    // If the app loads with a requested route passed from
+    // Sinatra, the router will navigate to the route.
+    function navigateToInitialRoute() {
+        var initialRoute = $.trim($("#route").attr("data-route"));
+        if(initialRoute.length > 0 && initialRoute !== '/')
+            router.navigate( '/' + $("#route").attr("data-route") );
     }
 
     // Handles the filtering of tasks based on status, criticality

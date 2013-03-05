@@ -1,5 +1,5 @@
 class Quadrants < Sinatra::Base
-    get '*/js/*' do
+    get '/*/js/*' do
     	content_type 'text/javascript'
     	file = params[:splat][1]
     	File.read(File.join("public/js/", "#{file}"))
