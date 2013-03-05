@@ -3,7 +3,6 @@
 // ToDo: Animate task position changes (buggy on first attempt); *
 // ToDo: Add functionality to sort by status, by date and alphabetically. *
 // ToDo: Cleanup and comment code. *
-// ToDo: Be able to handle page refresh from any URL. *
 // ToDo: Package for GitHub as a marketable portfolio piece. ^ *
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
 // ToDo: Add date support.
@@ -26,6 +25,7 @@ define([
         editTaskView, taskLists, taskViews, swipedTask;
     
     function initialize() {
+        var initialRoute = $.trim($("#route").attr("data-route"));
         router = new Router();
         interactionManager = new InteractionManager();
         tasksCollection = new TasksCollection();
@@ -42,6 +42,11 @@ define([
 
         $("body").append(editTaskView.$el);
         Backbone.history.start({pushState: true, root: '/'});
+
+        // If the app loads with a requested route passed from
+        // Sinatra, the router will navigate to the route.
+        if(initialRoute.length > 0 && initialRoute !== '/')
+            router.navigate( '/' + $("#route").attr("data-route") );
     }
 
     // Creates a task list for each quadrant and inserts the html.
@@ -77,7 +82,8 @@ define([
         router.on('route:newTask', populateEditView);
 
         router.on('route:unhandledRoute', function(route){
-            console.log("'" + route + "' is not a recognized request.");
+            if(route !== '/' && route.length > 0)
+                console.log("'" + route + "' is not a recognized request.");
         });
     }
 
@@ -141,17 +147,12 @@ define([
         _.each(taskLists, function(taskList){
             taskList.view.filterTasks(selectedFilters);
         });
-
-        // Immediately navigate back to root to minimize issues with LiveReload.
-        router.navigate( "/", {trigger: false} );
     }
 
     function populateEditView(task) {
         if(!_.isUndefined(task))
             interactionManager.resetInteraction(taskViews[task.cid], {silent: true});
         editTaskView.render(task);
-        // Immediately navigate back to root to minimize issues with LiveReload.
-        router.navigate( "/", {trigger: false} );
     }
 
     function createNewTask(e) {
