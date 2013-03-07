@@ -13,7 +13,7 @@
         %header
             .logo.is-not-selectable
                 Quadrants
-            .filters-wrapper
+            .view-options-wrapper
                 %span.label.is-not-selectable
                     Filters:
                 .filters
@@ -31,6 +31,16 @@
                         %span.status-icon.is-interactive.archived{:"data-filter" => "archived"}
                     %a.filter.backbone-action{:href => "tasks/toggle-filter/unarchived"}
                         %span.status-icon.is-interactive.unarchived{:"data-filter" => "unarchived"}
+            .view-options-wrapper
+                %span.label.is-not-selectable
+                    Sort by:
+                .sort-options
+                    %a.sort-option.backbone-action{:href => "tasks/sort/status"}
+                        status
+                    %span.delimiter.is-not-selectable
+                        |
+                    %a.sort-option.backbone-action{:href => "tasks/sort/title"}
+                        title
             .button.has-label.is-interactive.add
                 New task
         .quadrants

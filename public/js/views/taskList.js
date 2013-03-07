@@ -13,7 +13,7 @@ define([
             },
             initialize: function(){
                 _.bindAll(this, "positionTask");
-                this.tasks = {};
+                this.tasks = [];
                 this.spacing = 10;
                 this.taskHeight = 50;
                 this.space = undefined;
@@ -36,26 +36,29 @@ define([
                 
                 task.model.set("order", order);
                 this.taskList.append(task.$el);
-                this.tasks[task.cid] = task;
+                this.tasks.push(task);
                 
-                if(_.isUndefined(options.arrangeTasks) || options.arrangeTasks)
+                if(_.isUndefined(options.arrangeTasks) || options.arrangeTasks){
                     this.arrangeTasks();
+                }
 
                 return this;
             },
             remove: function(task, withSpace){
                 var order = task.model.get("order");
                 
-                if(_.isUndefined(this.tasks[task.cid]))
+                if(_.indexOf(task, this.tasks) < 0){
                     return this;
+                }
 
-                delete this.tasks[task.cid];
+                this.tasks = _.without(this.tasks, task);
                 this.shiftFrom(order, this.DOWN);
                 
-                if(withSpace)
+                if(withSpace){
                     this.makeSpaceAt(order);
-                else
+                } else {
                     this.arrangeTasks();
+                }
 
                 return this;
             },
@@ -106,8 +109,9 @@ define([
                 return this;
             },
             removeSpace: function(){
-                if(_.isUndefined(this.space))
+                if(_.isUndefined(this.space)){
                     return this;
+                }
                 this.space = undefined;
                 this.arrangeTasks();
 
@@ -157,12 +161,52 @@ define([
                 this.arrangeTasks();
                 return this;
             },
-            sortTasks: function(type){
+            sortTasks: function(type) {
+                function tasksAsString(tasks){
+                    var str = '';
+                    _.each(tasks, function(task) {
+                        str += task.cid;
+                    });
+                    return str;
+                }
 
+                function sortByTitle(a,b){
+                    if(a.model.get("title") < b.model.get("title")){ return -1; }
+                    if(a.model.get("title") > b.model.get("title")){ return 1; }
+                    return 0;
+                }
+
+                var statusOrdering = {"none": 0, "pending": 1, "started": 2, "complete": 3 },
+                    preservedList = tasksAsString(this.tasks);
+
+                if(type === "status") {
+                    this.tasks.sort(function(a,b){
+                        var aStatus = a.model.get("status"),
+                            bStatus = b.model.get("status");
+
+                        if(statusOrdering[aStatus] < statusOrdering[bStatus]){ return -1; }
+                        if(statusOrdering[aStatus] > statusOrdering[bStatus]){ return 1; }
+                        return sortByTitle(a,b);
+                    });
+                } else if (type === "title") {
+                    this.tasks.sort(sortByTitle);
+                }
+
+                if(tasksAsString(this.tasks) === preservedList){
+                    this.tasks.reverse();
+                }
+
+                _.each(this.tasks, function(task, i) {
+                    task.model.set("order", i);
+                });
+
+                this.arrangeTasks();
+                this.saveTasks();
+                return this;
             },
             // ToDo: Refactor this to use a single server request.
-            saveTasks: function(){
-                _.each(this.tasks, function(task){
+            saveTasks: function() {
+                _.each(this.tasks, function(task) {
                     task.model.save();
                 });
                 return this;

@@ -38,7 +38,7 @@ header {
 		font-size: 32px;
 		vertical-align: top;
 	}
-	.filters-wrapper {
+	.view-options-wrapper {
 		position: relative;
 		top: 5px;
 		height: 40px;
@@ -48,10 +48,19 @@ header {
 			position: relative;
 			top: -5px;
 		}
-		.filters {
+		.filters, .sort-options {
 			display: inline-block;
 			position: relative;
 			height: 40px;
+		}
+		.filters {
+			height: 40px;
+		}
+		.sort-options {
+			top: -5px;
+			.sort-option{
+				margin: 0 3px;
+			}
 		}
 	}
 	.button.add {

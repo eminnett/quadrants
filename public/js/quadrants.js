@@ -1,9 +1,10 @@
 // The core Quadrants application object.
 //
 // ToDo: Animate task position changes (buggy on first attempt); *
-// ToDo: Add functionality to sort by status, by date and alphabetically. *
 // ToDo: Cleanup and comment code. *
+// ToDo: Test. *
 // ToDo: Package for GitHub as a marketable portfolio piece. ^ *
+// ToDo: Add multi-touch support.
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
 // ToDo: Add date support.
 // ToDo: Create (or at least begin creating) a responsive layout.
@@ -21,9 +22,9 @@ define([
     "views/task",
     "helpers/drag"
 ], function($, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskListView, TaskView, dragHelper){
-    var router, interactionManager, taskListManager, tasksCollection,
-        editTaskView, taskLists, taskViews, swipedTask;
-    
+    var router, interactionManager, tasksCollection,
+        editTaskView, taskLists, taskViews;
+
     function initialize() {
         router = new Router();
         interactionManager = new InteractionManager();
@@ -64,6 +65,7 @@ define([
     function regJQListeners() {
         $("body").on("click", ".backbone-action", function(e){
             e.preventDefault();
+            router.navigate( '/', {trigger: true} );
             router.navigate( $(this).attr("href"), {trigger: true} );
         });
 
@@ -75,11 +77,13 @@ define([
 
     function regRouterListeners() {
         router.on('route:filterTasks', filterTasks);
+        router.on('route:sortTasks', sortTasks);
         router.on('route:newTask', populateEditView);
 
         router.on('route:unhandledRoute', function(route){
-            if(route !== '/' && route.length > 0)
-                console.log("'" + route + "' is not a recognized request.");
+            if(route !== '/' && route.length > 0){
+                // console.log("'" + route + "' is not a recognized request.");
+            }
         });
     }
 
@@ -124,8 +128,9 @@ define([
     // Sinatra, the router will navigate to the route.
     function navigateToInitialRoute() {
         var initialRoute = $.trim($("#route").attr("data-route"));
-        if(initialRoute.length > 0 && initialRoute !== '/')
+        if(initialRoute.length > 0 && initialRoute !== '/'){
             router.navigate( '/' + $("#route").attr("data-route") );
+        }
     }
 
     // Handles the filtering of tasks based on status, criticality
@@ -137,10 +142,11 @@ define([
             targetFilter = filterIcons.filter("." + type);
         targetFilter.toggleClass("is-selected");
 
-        if(type === "archived")
+        if(type === "archived"){
             filterIcons.filter(".unarchived").removeClass("is-selected");
-        else if(type === "unarchived")
+        }else if(type === "unarchived"){
             filterIcons.filter(".archived").removeClass("is-selected");
+        }
 
         selectedFilterIcons = filterIcons.filter(".is-selected");
 
@@ -151,11 +157,23 @@ define([
         _.each(taskLists, function(taskList){
             taskList.view.filterTasks(selectedFilters);
         });
+        // if(!targetFilter.hasClass("is-selected"))
+        //     router.navigate( '/', {trigger: true} );
+    }
+
+    // Handles the sorting of tasks by status or alphabetically.
+    //
+    // ToDo: Sort by date once date support has been added.
+    function sortTasks(type) {
+        _.each(taskLists, function(taskList){
+            taskList.view.sortTasks(type);
+        });
     }
 
     function populateEditView(task) {
-        if(!_.isUndefined(task))
+        if(!_.isUndefined(task)){
             interactionManager.resetInteraction(taskViews[task.cid], {silent: true});
+        }
         editTaskView.render(task);
     }
 
@@ -195,7 +213,22 @@ define([
 
     // Handle dragging a task.
     function onTaskDrag(e){
-        var target, targetQuadrant, priority, taskList,
+        function handleQuadrantClass(targetQuadrant){
+            if(!targetQuadrant.hasClass("drop-target")){
+                $(".quadrant.drop-target").removeClass("drop-target");
+                targetQuadrant.addClass("drop-target");
+            }
+        }
+
+        function resetTaskListSpaces(priority){
+            _.each(taskLists, function(taskList){
+                if(_.isUndefined(priority) || priority !== taskList.priority){
+                    taskList.view.removeSpace();
+                }
+            });
+        }
+
+        var targetQuadrant, priority, taskList,
             dTaskBoundary, taskHeight,
             taskView = e.view;
             
@@ -206,9 +239,9 @@ define([
                 dTaskBoundary = dragHelper.getBoundary(taskView.$el);
                 taskHeight = dTaskBoundary.bottom - dTaskBoundary.top;
                 taskList = _.where(taskLists, {priority: priority})[0];
-                
+
                 handleQuadrantClass(targetQuadrant);
-                
+
                 _.each(taskList.view.tasks, function(iterTask){
                     var tTaskBoundary = dragHelper.getBoundary(iterTask.$el);
                     if( dragHelper.boundariesIntersect(dTaskBoundary, tTaskBoundary) ) {
@@ -225,20 +258,6 @@ define([
                 $(".quadrant.drop-target").removeClass("drop-target");
             }
         //}
-        
-        function handleQuadrantClass(targetQuadrant){
-            if(!targetQuadrant.hasClass("drop-target")){
-                $(".quadrant.drop-target").removeClass("drop-target");
-                targetQuadrant.addClass("drop-target");
-            }
-        }
-
-        function resetTaskListSpaces(priority){
-            _.each(taskLists, function(taskList){
-                if(_.isUndefined(priority) || priority !== taskList.priority)
-                    taskList.view.removeSpace();
-            });
-        }
     }
 
     // Handle dropping a task into a new quadrant.
@@ -247,14 +266,15 @@ define([
             task = e.view.model,
             dropElement = document.elementFromPoint( e.pos.x, e.pos.y ),
             targetQuadrant = $(dropElement).parents(".quadrant");
-            
+
         if(targetQuadrant.length > 0) {
             priority = parseInt(targetQuadrant.attr("data-priority"), 10);
             dropTarget = _.where(taskLists, {priority: priority})[0].view;
             targetQuadrant.removeClass("drop-target");
             task.set("priority", priority);
-            if( priority !== 0)
+            if( priority !== 0){
                 task.set("critical", false);
+            }
         } else {
             dropTarget = _.where(taskLists, {priority: task.get("priority")})[0].view;
         }
