@@ -9,25 +9,22 @@ define([
         iconButtonTemplate = Mustache.compile( iconButtonTmpl ),
         taskTemplate = Mustache.compile( taskTmpl ),
         selectOptionTemplate = Mustache.compile( selectOptionTmpl ),
-        editTaskTemplate = Mustache.compile( editTaskTmpl ),
-        publicProps = {
-            populateTaskTemplate: populateTaskTemplate,
-            populateEditTaskTemplate: populateEditTaskTemplate
-        };
+        editTaskTemplate = Mustache.compile( editTaskTmpl );
 
     function populateTaskTemplate(model){
-        var statusMarkup, actionsMarkup, 
-            statusOptionsMarkup = '', 
+        var statusMarkup, actionsMarkup,
+            statusOptionsMarkup = '',
             archivedClass = (model.get("archived")) ? "unarchive" : "archive";
 
         statusMarkup = iconButtonFactory({value: model.get("status"), isSelected: true});
         
-        if(model.get("critical"))
+        if(model.get("critical")) {
             statusMarkup += iconButtonFactory({value: "critical", isSelected: true});
+        }
 
         _.each(statuses, function(value){
             statusOptionsMarkup += iconButtonFactory({
-                value: value, 
+                value: value,
                 isSelected: model.get("status") === value,
                 isExclusive: true,
                 isInteractive: true
@@ -36,7 +33,7 @@ define([
 
         if(model.get("priority") === 0){
             statusOptionsMarkup += iconButtonFactory({
-                value: "critical", 
+                value: "critical",
                 isSelected: model.get("critical"),
                 isInteractive: true
             });
@@ -68,7 +65,7 @@ define([
 
         _.each(statuses, function(value){
             statusOptionsMarkup += iconButtonFactory({
-                value: value, 
+                value: value,
                 isSelected: model.get("status") === value,
                 isExclusive: true,
                 isInteractive: true,
@@ -77,7 +74,7 @@ define([
         });
 
         statusOptionsMarkup += iconButtonFactory({
-            value: "critical", 
+            value: "critical",
             isSelected: model.get("critical"),
             isHidden: model.get("priority") !== 0,
             isInteractive: true,
@@ -86,25 +83,25 @@ define([
 
         _.each(selectOptions, function(option){
             selectOptionsMarkup += selectOptionTemplate({
-                value: option.priority, 
+                value: option.priority,
                 selected: option.priority === model.get("priority"),
                 label: option.label
             });
         });
 
         saveButtonMarkup = iconButtonFactory({
-            value: "save", 
-            isInteractive: true, 
+            value: "save",
+            isInteractive: true,
             hasLabel: true
         });
         archiveButtonMarkup = iconButtonFactory({
-            value: (model.get("archived")) ? "unarchive" : "archive", 
-            isInteractive: true, 
+            value: (model.get("archived")) ? "unarchive" : "archive",
+            isInteractive: true,
             hasLabel: true
         });
         deleteButtonMarkup = iconButtonFactory({
-            value: (isNew) ? "cancel" : "delete", 
-            isInteractive: true, 
+            value: (isNew) ? "cancel" : "delete",
+            isInteractive: true,
             hasLabel: true
         });
 
@@ -121,28 +118,31 @@ define([
 
     //options properties: value, hasLabel, isInteractive, isExclusive, isSelected, isHidden
     function iconButtonFactory(options){
+        function toTitleCase(str) {
+            return str.replace(/\w\S*/g, function(txt){
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+        }
         var type, label,
             states = '';
 
-        if(_.contains(statuses, options.value) || options.value === "critical")
+        if(_.contains(statuses, options.value) || options.value === "critical") {
             type = "status-icon";
-        else
+        } else {
             type = "action button";
+        }
 
-        if(options.isInteractive)
-            states += "is-interactive ";
-        if(options.isExclusive)
-            states += "is-exclusive ";
-        if(options.isSelected)
-            states += "is-selected ";
-        if(options.isHidden)
-            states += "is-hidden ";
+        if(options.isInteractive){states += "is-interactive ";}
+        if(options.isExclusive){states += "is-exclusive ";}
+        if(options.isSelected){states += "is-selected ";}
+        if(options.isHidden){states += "is-hidden ";}
         if(options.hasLabel){
             states += "has-label ";
-            if(options.value === "none")
+            if(options.value === "none"){
                 label = "No status";
-            else
+            } else {
                 label = toTitleCase(options.value);
+            }
         }
 
         return iconButtonTemplate({
@@ -151,13 +151,10 @@ define([
             states: states,
             label: label
         });
-
-        function toTitleCase(str) {
-            return str.replace(/\w\S*/g, function(txt){
-                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            });
-        }
     }
 
-    return publicProps;
+    return {
+        populateTaskTemplate: populateTaskTemplate,
+        populateEditTaskTemplate: populateEditTaskTemplate
+    };
 });

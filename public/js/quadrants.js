@@ -2,13 +2,16 @@
 //
 // ToDo: Animate task position changes (buggy on first attempt); *
 // ToDo: Cleanup and comment code. *
-// ToDo: Test. *
-// ToDo: Package for GitHub as a marketable portfolio piece. ^ *
+// ToDo: Package for GitHub. ^ *
+// ToDo: Put on server. ^ *
+// ToDo: Set up deployment process. ^ *
 // ToDo: Add multi-touch support.
-// ToDo: Create a global event dispatcher in order to clean up event dispatching across the app. (Is this needed?)
+// ToDo: Create a global event dispatcher in order to clean up event dispatching across the app.
+//      (Is this needed?)
 // ToDo: Add date support.
 // ToDo: Create (or at least begin creating) a responsive layout.
-// ToDo: Develop the ability to resize quadrants (this will be best combined with a responsive layout).
+// ToDo: Develop the ability to resize quadrants
+//      (this will be best combined with a responsive layout).
 // ToDo: Test.
 // ToDo: Make wishlist for next round of development.
 define([
@@ -21,7 +24,9 @@ define([
     "views/taskList",
     "views/task",
     "helpers/drag"
-], function($, Backbone, Router, InteractionManager, TasksCollection, EditTaskView, TaskListView, TaskView, dragHelper){
+], function($, Backbone, Router, InteractionManager, TasksCollection,
+        EditTaskView, TaskListView, TaskView, dragHelper){
+
     var router, interactionManager, tasksCollection,
         editTaskView, taskLists, taskViews;
 
@@ -157,8 +162,6 @@ define([
         _.each(taskLists, function(taskList){
             taskList.view.filterTasks(selectedFilters);
         });
-        // if(!targetFilter.hasClass("is-selected"))
-        //     router.navigate( '/', {trigger: true} );
     }
 
     // Handles the sorting of tasks by status or alphabetically.
@@ -231,7 +234,7 @@ define([
         var targetQuadrant, priority, taskList,
             dTaskBoundary, taskHeight,
             taskView = e.view;
-            
+
         //if (taskView.$el.hasClass("is-dragging")) { //class not working as expected yet
             targetQuadrant = dragHelper.getQuadrantAtPoint(e.pos.x, e.pos.y);
             if(targetQuadrant.length > 0) {

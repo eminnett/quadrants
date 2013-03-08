@@ -4,7 +4,8 @@ define([
     "libs/text!templates/taskList.html"
 ], function(Backbone, Mustache, taskListTemplate){
 
-    var template = Mustache.compile( taskListTemplate ),
+    var undef = _.isUndefined,
+        template = Mustache.compile( taskListTemplate ),
         TaskListView = Backbone.View.extend({
             UP: "shift_task_order_up",
             DOWN: "shift_task_order_down",
@@ -17,6 +18,7 @@ define([
                 this.spacing = 10;
                 this.taskHeight = 50;
                 this.space = undefined;
+                this.filters = [];
                 this.hiddenOrders = [];
                 this.render();
                 return this;
@@ -27,18 +29,18 @@ define([
                 return this;
             },
             insert: function(task, index, options){
-                var order = (_.isUndefined(index)) ? _.keys(this.tasks).length : index;
-                
-                if(!_.isUndefined(index) &&
-                    (_.isUndefined(options.shiftTasks) || options.shiftTasks)) {
+                var order = (undef(index)) ? _.keys(this.tasks).length : index;
+
+                if(!undef(index) &&
+                    (undef(options.shiftTasks) || options.shiftTasks)) {
                         this.shiftFrom(order, this.UP);
                 }
-                
+
                 task.model.set("order", order);
                 this.taskList.append(task.$el);
                 this.tasks.push(task);
-                
-                if(_.isUndefined(options.arrangeTasks) || options.arrangeTasks){
+
+                if(undef(options.arrangeTasks) || options.arrangeTasks){
                     this.arrangeTasks();
                 }
 
@@ -46,14 +48,14 @@ define([
             },
             remove: function(task, withSpace){
                 var order = task.model.get("order");
-                
-                if(_.indexOf(task, this.tasks) < 0){
+
+                if(_.indexOf(this.tasks, task) < 0){
                     return this;
                 }
 
                 this.tasks = _.without(this.tasks, task);
                 this.shiftFrom(order, this.DOWN);
-                
+
                 if(withSpace){
                     this.makeSpaceAt(order);
                 } else {
@@ -74,9 +76,9 @@ define([
                         indices.push(task.model.get("order"));
                     });
                 }
-                
+
                 indices.sort();
-    
+
                 if( _.range(indices.length).toString() === indices.toString()) {
                     this.arrangeTasks();
                     return this;
@@ -125,25 +127,28 @@ define([
                 var order = task.model.get("order"),
                     numHiddenBellow = _.sortedIndex(this.hiddenOrders, order),
                     visIdx = order - numHiddenBellow,
-                    index = (_.isUndefined(this.space) || this.space > visIdx) ? visIdx : visIdx + 1,
+                    index = (undef(this.space) || this.space > visIdx) ? visIdx : visIdx + 1,
                     position = index * (this.taskHeight + this.spacing);
                 //task.$el.animate({"top": position}); //animation is buggy
                 task.$el.css({"top": position + "px"});
             },
             filterTasks: function(filters){
-                var hidden = this.hiddenOrders = [];
-                
+                var hidden = this.hiddenOrders = [],
+                    archFilters = ["archived", "unarchived"],
+                    noArchFilter = _.intersection(filters, archFilters).length === 0;
+
+                this.filters = filters;
+
                 if( filters.length === 0 ){
                     this.taskList.find(".task.is-hidden").removeClass("is-hidden");
                 } else {
                     _.each(this.tasks, function(task){
                         var taskArchived = task.model.get("archived"),
-                            noArchiveFilter = _.intersection(filters, ["archived", "unarchived"]).length === 0,
-                            isFiltered = noArchiveFilter ||
+                            isFiltered = noArchFilter ||
                                 (_.contains(filters, "archived") && taskArchived) ||
                                 (_.contains(filters, "unarchived") && !taskArchived);
 
-                        if((filters.length > 1 || noArchiveFilter) && isFiltered){
+                        if((filters.length > 1 || noArchFilter) && isFiltered){
                             isFiltered = _.contains(filters, task.model.get("status")) ||
                                 (_.contains(filters, "critical") && task.model.get("critical"));
                         }
@@ -176,21 +181,20 @@ define([
                     return 0;
                 }
 
-                var statusOrdering = {"none": 0, "pending": 1, "started": 2, "complete": 3 },
+                function sortByStatus(a,b){
+                    var aStatus = a.model.get("status"),
+                        bStatus = b.model.get("status");
+
+                    if(statusOrder[aStatus] < statusOrder[bStatus]){ return -1; }
+                    if(statusOrder[aStatus] > statusOrder[bStatus]){ return 1; }
+                    return sortByTitle(a,b);
+                }
+
+                var statusOrder = {"none": 0, "pending": 1, "started": 2, "complete": 3 },
+                    sortFunctions = {"status": sortByStatus, "title": sortByTitle},
                     preservedList = tasksAsString(this.tasks);
 
-                if(type === "status") {
-                    this.tasks.sort(function(a,b){
-                        var aStatus = a.model.get("status"),
-                            bStatus = b.model.get("status");
-
-                        if(statusOrdering[aStatus] < statusOrdering[bStatus]){ return -1; }
-                        if(statusOrdering[aStatus] > statusOrdering[bStatus]){ return 1; }
-                        return sortByTitle(a,b);
-                    });
-                } else if (type === "title") {
-                    this.tasks.sort(sortByTitle);
-                }
+                this.tasks.sort(sortFunctions[type]);
 
                 if(tasksAsString(this.tasks) === preservedList){
                     this.tasks.reverse();
@@ -200,6 +204,9 @@ define([
                     task.model.set("order", i);
                 });
 
+                if(this.filters.length > 0) {
+                    this.filterTasks(this.filters);
+                }
                 this.arrangeTasks();
                 this.saveTasks();
                 return this;
