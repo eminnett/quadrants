@@ -1,3 +1,5 @@
+// The InteractionManager handles the tap, drag, and swipe events and
+// encapsulates the logic for those events.
 define([
     "jquery",
     "underscore",
@@ -5,10 +7,14 @@ define([
 ], function ($, _, InteractionConverter) {
     "use strict";
 
-    var ic;
-
     function InteractionManager() {
-        var swipe, drag, isPreSwiping, exclusiveView,
+        // Functions
+        var initialize, registerView, unregisterView, resetInteraction, resetExclusive,
+            handleTap, handleDTap, handleLongPress, handleDragStart, handleDrag,
+            initiateDrag, handleDragEnd, completeDrag, handlePreSwipe, determineSwipe,
+            swipeLeft, swipeRight, resetSwipe, removeStates, attempt,
+        // Properties
+            ic, swipe, drag, isPreSwiping, exclusiveView,
             consts = {
                 TAP: "im_tap",
                 DOUBLE_TAP: "im_double_tap",
@@ -21,15 +27,15 @@ define([
                 DROP: "im_drop"
             };
 
-        function initialize() {
+        initialize = function () {
             ic = new InteractionConverter();
             ic.initialize();
 
             swipe = { swiping: false, swiped: false };
             drag = { dragging: false };
-        }
+        };
 
-        function registerView(view) {
+        registerView = function (view) {
             if (view.canTap) {
                 view.$el.on(ic.TAP, {view: view}, handleTap);
                 view.$el.on(ic.DOUBLE_TAP, {view: view}, handleDTap);
@@ -40,9 +46,9 @@ define([
                 view.$el.on(ic.DRAG, {view: view}, handleDrag);
                 view.$el.on(ic.DRAG_END, {view: view}, handleDragEnd);
             }
-        }
+        };
 
-        function unregisterView(view) {
+        unregisterView = function (view) {
             if (view.canTap) {
                 view.$el.off(ic.TAP, handleTap);
                 view.$el.off(ic.DOUBLE_TAP, handleDTap);
@@ -53,15 +59,15 @@ define([
                 view.$el.off(ic.DRAG, handleDrag);
                 view.$el.off(ic.DRAG_END, handleDragEnd);
             }
-        }
+        };
 
-        function resetInteraction(view, options) {
+        resetInteraction = function (view, options) {
             if (view.canSwipe) {
                 resetSwipe(view, options);
             }
-        }
+        };
 
-        function resetExclusive(view) {
+        resetExclusive = function (view) {
             if (view === exclusiveView) {
                 return;
             }
@@ -71,30 +77,30 @@ define([
             }
 
             exclusiveView = (view.exclusiveInteraction) ? view : undefined;
-        }
+        };
 
-        function handleTap(e) {
+        handleTap = function (e) {
             var view = e.data.view;
             resetExclusive(view);
             attempt(view, "onTap");
             view.trigger(consts.TAP, {view: view});
-        }
+        };
 
-        function handleDTap(e) {
+        handleDTap = function (e) {
             var view = e.data.view;
             resetExclusive(view);
             attempt(view, "onDoubleTap");
             view.trigger(consts.DOUBLE_TAP, {view: view});
-        }
+        };
 
-        function handleLongPress(e) {
+        handleLongPress = function (e) {
             var view = e.data.view;
             resetExclusive(view);
             attempt(view, "onLongPress");
             view.trigger(consts.LONG_PRESS, {view: view});
-        }
+        };
 
-        function handleDragStart(e) {
+        handleDragStart = function (e) {
             var view = e.data.view;
             if (view.canSwipe) {
                 view.$el.addClass("is-swiping");
@@ -107,15 +113,16 @@ define([
                     y: e.interaction.start.y - view.$el.offset().top
                 };
             }
-        }
+        };
 
-        function handleDrag(e) {
-            var view = e.data.view;
+        handleDrag = function (e) {
+            var view = e.data.view,
+                relativeMouseY = e.interaction.distance.y + drag.localMouseStart.y;
             if (!drag.dragging) {
                 if (view.canSwipe) {
-                    if ((Math.abs(e.interaction.angle) > 45 && Math.abs(e.interaction.angle) < 135 && !isPreSwiping) ||
-                            e.interaction.distance.y + drag.localMouseStart.y  < 0 ||
-                            e.interaction.distance.y + drag.localMouseStart.y  > view.getSwipeEl().height()) {
+                    if ((Math.abs(e.interaction.angle) > 45 &&
+                            Math.abs(e.interaction.angle) < 135 && !isPreSwiping) ||
+                            relativeMouseY  < 0 || relativeMouseY  > view.getSwipeEl().height()) {
                         isPreSwiping = false;
                         if (view.canDrag) {
                             initiateDrag(view);
@@ -145,10 +152,10 @@ define([
                     }
                 });
             }
-        }
+        };
 
         // Handles the beginning of a drag interaction.
-        function initiateDrag(view) {
+        initiateDrag = function (view) {
             var offsetPos = view.$el.offset();
             resetExclusive(view);
             if (swipe.swiped) {
@@ -171,10 +178,10 @@ define([
             });
             $("body").append(view.$el);
             view.trigger(consts.DRAG_START, {view: view});
-        }
+        };
 
         // Handles the drag_end event dispatch.
-        function handleDragEnd(e) {
+        handleDragEnd = function (e) {
             var view = e.data.view;
             if (drag.dragging) {
                 completeDrag(view);
@@ -182,9 +189,9 @@ define([
                 isPreSwiping = false;
                 determineSwipe(view);
             }
-        }
+        };
         // Handles the completion of a drag interaction.
-        function completeDrag(view) {
+        completeDrag = function (view) {
             removeStates(view);
             view.$el.removeAttr("style");
             view.trigger(consts.DROP, {
@@ -195,9 +202,9 @@ define([
                 }
             });
             drag = { dragging: false };
-        }
+        };
         // Handles the dragging of the swipe element during a swipe interaction.
-        function handlePreSwipe(e, swipeEl) {
+        handlePreSwipe = function (e, swipeEl) {
             function resist(force, threshold) {
                 return force * (1 - 1 / (Math.abs(force) / threshold + 1));
             }
@@ -219,8 +226,8 @@ define([
             newX = swipeDistance - resistance;
 
             swipeEl.css({"left": newX + "px"});
-        }
-        function determineSwipe(view) {
+        };
+        determineSwipe = function (view) {
             var layerPos = view.getSwipeEl().position().left;
             resetExclusive(view);
             if (layerPos > 0) {
@@ -236,9 +243,9 @@ define([
                     resetSwipe(view);
                 }
             }
-        }
+        };
         // Completes a swipe to the left.
-        function swipeLeft(view) {
+        swipeLeft = function (view) {
             swipe.swiped = true;
             view.getSwipeEl().animate(
                 {"left": (-view.getSwipeLeftDistance()) + "px"},
@@ -246,9 +253,9 @@ define([
             );
             attempt(view, "onSwipeLeft");
             view.trigger(consts.SWIPE_LEFT, {view: view});
-        }
+        };
         // Completes a swipe to the right.
-        function swipeRight(view) {
+        swipeRight = function (view) {
             swipe.swiped = true;
             view.getSwipeEl().animate(
                 {"left": view.getSwipeRightDistance() + "px"},
@@ -256,9 +263,9 @@ define([
             );
             attempt(view, "onSwipeRight");
             view.trigger(consts.SWIPE_RIGHT, {view: view});
-        }
+        };
         // Resets the swipe (and shakes it all about. No not really ;))
-        function resetSwipe(view, options) {
+        resetSwipe = function (view, options) {
             view.getSwipeEl().animate({"left": 0}, function () {
                 removeStates(view);
                 swipe.swiped = false;
@@ -268,19 +275,19 @@ define([
             if (_.isUndefined(options) || !options.silent) {
                 view.trigger(consts.SWIPE_RESET, {view: view});
             }
-        }
+        };
 
-        function removeStates(view) {
+        removeStates = function (view) {
             view.$el.removeClass("is-dragging").removeClass("is-swiping");
-        }
+        };
 
-        function attempt() {
+        attempt = function () {
             var view = Array.prototype.shift.call(arguments),
                 method = Array.prototype.shift.call(arguments);
             if (_.isFunction(view[method])) {
                 view[method](arguments);
             }
-        }
+        };
 
         return _.extend(consts, {
             initialize: initialize,

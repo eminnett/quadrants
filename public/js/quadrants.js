@@ -1,10 +1,9 @@
 // The core Quadrants application object.
 //
-// ToDo: Animate task position changes (buggy on first attempt); *
-// ToDo: Comment code. *
 // ToDo: Package for GitHub. ^ *
 // ToDo: Put on server. ^ *
 // ToDo: Set up deployment process. ^ *
+// ToDo: Animate task position changes (buggy on first attempt);
 // ToDo: Add multi-touch support.
 // ToDo: Create a global event dispatcher in order to clean up event dispatching across the app.
 //      (Is this needed?)
@@ -28,11 +27,15 @@ define([
 ], function ($, _, Backbone, Router, InteractionManager, TasksCollection,
         EditTaskView, TaskListView, TaskView, dragHelper) {
     "use strict";
+        // Functions
+    var initialize, instantiateTaskLists, regJQListeners, regRouterListeners,
+        regCollectionListeners, regEditTaskListeners, regTaskListeners,
+        navigateToInitialRoute, filterTasks, sortTasks, populateEditView,
+        createNewTask, onSave, onDelete, onTaskDragStart, onTaskDrag, onTaskDrop,
+        // Properties
+        router, interactionManager, tasksCollection, editTaskView, taskLists, taskViews;
 
-    var router, interactionManager, tasksCollection,
-        editTaskView, taskLists, taskViews;
-
-    function initialize() {
+    initialize = function () {
         router = new Router();
         interactionManager = new InteractionManager();
         tasksCollection = new TasksCollection();
@@ -51,10 +54,10 @@ define([
         Backbone.history.start({pushState: true, root: '/'});
 
         navigateToInitialRoute();
-    }
+    };
 
     // Creates a task list for each quadrant and inserts the html.
-    function instantiateTaskLists() {
+    instantiateTaskLists = function () {
         var halfs = $(".half");
         taskLists = {
             topLeft: { priority: 0, view: new TaskListView() },
@@ -67,9 +70,9 @@ define([
         halfs.filter(".top").find(".quadrant.right").append(taskLists.topRight.view.$el);
         halfs.filter(".bottom").find(".quadrant.left").append(taskLists.bottomLeft.view.$el);
         halfs.filter(".bottom").find(".quadrant.right").append(taskLists.bottomRight.view.$el);
-    }
+    };
 
-    function regJQListeners() {
+    regJQListeners = function () {
         $("body").on("click", ".backbone-action", function (e) {
             e.preventDefault();
             router.navigate('/', {trigger: true});
@@ -80,9 +83,9 @@ define([
             e.preventDefault();
             router.navigate('task/new', {trigger: true});
         });
-    }
+    };
 
-    function regRouterListeners() {
+    regRouterListeners = function () {
         router.on('route:filterTasks', filterTasks);
         router.on('route:sortTasks', sortTasks);
         router.on('route:newTask', populateEditView);
@@ -92,9 +95,9 @@ define([
         //         // console.log("'" + route + "' is not a recognized request.");
         //     }
         // });
-    }
+    };
 
-    function regCollectionListeners() {
+    regCollectionListeners = function () {
         tasksCollection.on('reset', function (e) {
             _.each(e.models, function (model) {
                 var taskList,
@@ -112,16 +115,16 @@ define([
                 taskList.view.fixOrder();
             });
         });
-    }
+    };
 
-    function regEditTaskListeners() {
+    regEditTaskListeners = function () {
         editTaskView.on(editTaskView.NEW_TASK, createNewTask);
         editTaskView.on(editTaskView.CANCEL_EDIT, onSave);
         editTaskView.on(editTaskView.SAVE_TASK, onSave);
         editTaskView.on(editTaskView.DELETE_TASK, onDelete);
-    }
+    };
 
-    function regTaskListeners(taskView) {
+    regTaskListeners = function (taskView) {
         taskView.on(interactionManager.TAP, function (e) {
             populateEditView(e.view.model);
         });
@@ -129,20 +132,20 @@ define([
         taskView.on(interactionManager.DRAG, onTaskDrag);
         taskView.on(interactionManager.DROP, onTaskDrop);
         taskView.on(taskView.DELETE, onDelete);
-    }
+    };
 
     // If the app loads with a requested route passed from
     // Sinatra, the router will navigate to the route.
-    function navigateToInitialRoute() {
+    navigateToInitialRoute = function () {
         var initialRoute = $.trim($("#route").attr("data-route"));
         if (initialRoute.length > 0 && initialRoute !== '/') {
             router.navigate('/' + $("#route").attr("data-route"));
         }
-    }
+    };
 
     // Handles the filtering of tasks based on status, criticality
     // and archived state.
-    function filterTasks(type) {
+    filterTasks = function (type) {
         var selectedFilterIcons,
             selectedFilters = [],
             filterIcons = $(".filter .status-icon"),
@@ -164,60 +167,60 @@ define([
         _.each(taskLists, function (taskList) {
             taskList.view.filterTasks(selectedFilters);
         });
-    }
+    };
 
     // Handles the sorting of tasks by status or alphabetically.
     //
     // ToDo: Sort by date once date support has been added.
-    function sortTasks(type) {
+    sortTasks = function (type) {
         _.each(taskLists, function (taskList) {
             taskList.view.sortTasks(type);
         });
-    }
+    };
 
-    function populateEditView(task) {
+    populateEditView = function (task) {
         if (!_.isUndefined(task)) {
             interactionManager.resetInteraction(taskViews[task.cid], {silent: true});
         }
         editTaskView.render(task);
-    }
+    };
 
-    function createNewTask(e) {
+    createNewTask = function (e) {
         var taskView = new TaskView({model: e.model});
         tasksCollection.add(e.model);
         taskViews[e.model.cid] = taskView;
         interactionManager.registerView(taskView);
         regTaskListeners(taskView);
-    }
+    };
 
     // Handle saving a task.
-    function onSave(e) {
+    onSave = function (e) {
         var task = e.model,
             quadrant = parseInt(task.get("priority"), 10),
             taskView = taskViews[task.cid];
         $(".quadrant").eq(quadrant).find(".task-list").prepend(taskView.$el);
-    }
+    };
 
     // Handle deleting a task.
-    function onDelete(e) {
+    onDelete = function (e) {
         var task = e.model,
             taskView = taskViews[task.cid];
         interactionManager.unregisterView(taskView);
         delete taskViews[task.cid];
         taskView.remove();
         task.destroy({url: task.url + "/" + task.id});
-    }
+    };
 
     // Handle starting to drag a task.
-    function onTaskDragStart(e) {
+    onTaskDragStart = function (e) {
         var taskView = e.view,
             priority = parseInt(taskView.model.get("priority"), 10),
             taskList = _.where(taskLists, {priority: priority})[0];
         taskList.view.remove(taskView, true);
-    }
+    };
 
     // Handle dragging a task.
-    function onTaskDrag(e) {
+    onTaskDrag = function (e) {
         function handleQuadrantClass(targetQuadrant) {
             if (!targetQuadrant.hasClass("drop-target")) {
                 $(".quadrant.drop-target").removeClass("drop-target");
@@ -263,10 +266,10 @@ define([
             $(".quadrant.drop-target").removeClass("drop-target");
         }
         //}
-    }
+    };
 
     // Handle dropping a task into a new quadrant.
-    function onTaskDrop(e) {
+    onTaskDrop = function (e) {
         var priority, dropTarget,
             task = e.view.model,
             dropElement = document.elementFromPoint(e.pos.x, e.pos.y),
@@ -286,7 +289,7 @@ define([
         dropTarget.insert(e.view, dropTarget.space, {arrangeTasks: false});
         dropTarget.removeSpace();
         dropTarget.saveTasks();
-    }
+    };
 
     // Initialize is the only public method.
     return {

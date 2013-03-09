@@ -21,6 +21,7 @@ define(["underscore", "backbone"], function (_, Backbone) {
             response.id = response._id.$oid;
             return response;
         },
+        // Ensure "priority" is an integer.
         validate: function (attributes) {
             if (_.isString(attributes.priority)) {
                 this.set("priority", parseInt(attributes.priority, 10));

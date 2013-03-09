@@ -81,7 +81,7 @@ define([
                         this.model.save();
                     };
                 }
-                //this.resetSwipe(); // How will this work?
+                //this.resetSwipe(); // This will have to be done via an event dispatch;
                 return this;
             },
             // Handles a change in archive state or deletion. This can
@@ -101,7 +101,7 @@ define([
                         this.model.save();
                     };
                 }
-                //this.resetSwipe(); // How will this work?
+                //this.resetSwipe(); // This will have to be done via an event dispatch;
             }
         });
 

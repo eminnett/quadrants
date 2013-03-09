@@ -7,14 +7,16 @@ define([
     "libs/text!templates/editTask.html"
 ], function (_, Mustache, iconButtonTmpl, taskTmpl, selectOptionTmpl, editTaskTmpl) {
     "use strict";
-
-    var statuses = ["none", "pending", "started", "complete"],
+        // Functions
+    var populateTaskTemplate, populateEditTaskTemplate, iconButtonFactory,
+        // Properties
+        statuses = ["none", "pending", "started", "complete"],
         iconButtonTemplate = Mustache.compile(iconButtonTmpl),
         taskTemplate = Mustache.compile(taskTmpl),
         selectOptionTemplate = Mustache.compile(selectOptionTmpl),
         editTaskTemplate = Mustache.compile(editTaskTmpl);
 
-    function populateTaskTemplate(model) {
+    populateTaskTemplate = function (model) {
         var statusMarkup, actionsMarkup,
             statusOptionsMarkup = '',
             archivedClass = (model.get("archived")) ? "unarchive" : "archive";
@@ -52,9 +54,9 @@ define([
             statusOptionsMarkup: statusOptionsMarkup,
             actionsMarkup: actionsMarkup
         });
-    }
+    };
 
-    function populateEditTaskTemplate(isNew, model) {
+    populateEditTaskTemplate = function (isNew, model) {
         var saveButtonMarkup, archiveButtonMarkup, deleteButtonMarkup,
             selectOptionsMarkup = '',
             statusOptionsMarkup = '',
@@ -117,10 +119,12 @@ define([
             archiveButtonMarkup: archiveButtonMarkup,
             deleteButtonMarkup: deleteButtonMarkup
         });
-    }
+    };
 
-    //options properties: value, hasLabel, isInteractive, isExclusive, isSelected, isHidden
-    function iconButtonFactory(options) {
+    // Generates icon and button markup based on a given set of options.
+    //
+    // options properties: value, hasLabel, isInteractive, isExclusive, isSelected, isHidden
+    iconButtonFactory = function (options) {
         function toTitleCase(str) {
             return str.replace(/\w\S*/g, function (txt) {
                 return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
@@ -154,7 +158,7 @@ define([
             states: states,
             label: label
         });
-    }
+    };
 
     return {
         populateTaskTemplate: populateTaskTemplate,

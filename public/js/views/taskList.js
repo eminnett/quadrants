@@ -30,6 +30,7 @@ define([
                 this.taskList = this.$(".task-list");
                 return this;
             },
+            // Insert a task into the TaskList either at the end or at a givem index.
             insert: function (task, index, options) {
                 var order = (undef(index)) ? _.keys(this.tasks).length : index;
 
@@ -48,6 +49,7 @@ define([
 
                 return this;
             },
+            // Removes a task from the TaskList either with or without a space.
             remove: function (task, withSpace) {
                 var order = task.model.get("order");
 
@@ -66,8 +68,7 @@ define([
 
                 return this;
             },
-            // Recursively ensures the order of tasks is
-            // sequential and without gaps.
+            // Recursively ensures the order of tasks is sequential and without gaps.
             fixOrder: function (indexList) {
                 var shiftDirection,
                     indices = indexList || [],
@@ -94,6 +95,7 @@ define([
                     }
                 }
             },
+            // Shifts the tasks above a certain index either "up" or "down".
             shiftFrom: function (index, direction) {
                 var shiftUp = direction === this.UP,
                     indexList = [];
@@ -107,11 +109,13 @@ define([
                 });
                 return indexList;
             },
+            // Makes a space in the TaskList at a given index.
             makeSpaceAt: function (index) {
                 this.space = index;
                 this.arrangeTasks();
                 return this;
             },
+            // Removes a space if it exists.
             removeSpace: function () {
                 if (_.isUndefined(this.space)) {
                     return this;
@@ -121,10 +125,12 @@ define([
 
                 return this;
             },
+            // Positions all tasks.
             arrangeTasks: function () {
                 _.each(this.tasks, this.positionTask);
                 return this;
             },
+            // Position a given task taking a space and hidden tasks into account.
             positionTask: function (task) {
                 var order = task.model.get("order"),
                     numHiddenBellow = _.sortedIndex(this.hiddenOrders, order),
@@ -134,6 +140,7 @@ define([
                 //task.$el.animate({"top": position}); //animation is buggy
                 task.$el.css({"top": position + "px"});
             },
+            // Show or hide tasks based on a set of filters.
             filterTasks: function (filters) {
                 var hidden = this.hiddenOrders = [],
                     archFilters = ["archived", "unarchived"],
@@ -168,6 +175,8 @@ define([
                 this.arrangeTasks();
                 return this;
             },
+            // Sorts the tasks by "title", or "status". If the tasks are
+            // already sorted, the order is reversed.
             sortTasks: function (type) {
                 var sortFunctions, preservedList,
                     statusOrder = {"none": 0, "pending": 1, "started": 2, "complete": 3 };

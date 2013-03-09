@@ -1,4 +1,4 @@
-// The AInteractionConverter handles mouse and touch events and converts the
+// The InteractionConverter handles mouse and touch events and converts the
 // interaction into more meaningful events such as drag and swipe.
 //
 // ToDo: Implement double tap.
@@ -6,11 +6,13 @@
 define(["jquery", "underscore"], function ($, _) {
     "use strict";
 
-    var InteractionConverter;
-
-    InteractionConverter = function () {
-        var props, dragStarted, timer, startTime,
-            prevIntervalTime, mouse, step, interaction,
+    function InteractionConverter() {
+        // Functions
+        var initialize, reset, regListeners, onMouseDown, onMouseUp, onMouseMove,
+            start, onInterval, update, trigger,
+        // Properties
+            props, dragStarted, timer, startTime, prevIntervalTime, mouse,
+            step, interaction,
             consts = {
                 TAP: "ic_tap",
                 DOUBLE_TAP: "ic_double_tap",
@@ -20,7 +22,7 @@ define(["jquery", "underscore"], function ($, _) {
                 DRAG_END: "ic_drag_end"
             };
 
-        function initialize() {
+        initialize = function () {
             props = {
                 frameRate: 50,          // frames/second
                 maxTapDuration: 50,     // miliseconds
@@ -29,10 +31,10 @@ define(["jquery", "underscore"], function ($, _) {
 
             reset();
             regListeners();
-        }
+        };
 
         // Reset the interaction data to null states.
-        function reset() {
+        reset = function () {
             dragStarted = false;
             timer = null;
             startTime = null;
@@ -48,19 +50,19 @@ define(["jquery", "underscore"], function ($, _) {
                 distance: {},
                 target: null
             };
-        }
+        };
 
-        function regListeners() {
+        regListeners = function () {
             $(document).on("mousedown", onMouseDown);
             $(document).on("mouseup", onMouseUp);
-        }
+        };
 
-        function onMouseDown(e) {
+        onMouseDown = function (e) {
             $(document).on("mousemove", onMouseMove);
             start(e); //double tap will have to be taken into account.
-        }
+        };
 
-        function onMouseUp() {
+        onMouseUp = function () {
             $(document).off("mousemove", onMouseMove);
             clearTimeout(timer);
 
@@ -71,16 +73,16 @@ define(["jquery", "underscore"], function ($, _) {
             }
 
             reset();
-        }
+        };
 
         // Record the mouse position.
-        function onMouseMove(e) {
+        onMouseMove = function (e) {
             mouse.x = e.pageX;
             mouse.y = e.pageY;
-        }
+        };
 
         // Begin the interaction and initialize the interaction data.
-        function start(e) {
+        start = function (e) {
             interaction.target = e.target;
             interaction.start.x = e.pageX;
             interaction.start.y = e.pageY;
@@ -89,10 +91,10 @@ define(["jquery", "underscore"], function ($, _) {
             startTime = new Date().getTime();
             prevIntervalTime = startTime;
             timer = setTimeout(onInterval, 1000 / props.frameRate);
-        }
+        };
 
         // Handle the frame interval.
-        function onInterval() {
+        onInterval = function () {
             var now, newDelay;
             update();
             if (!_.isUndefined(interaction.angle)) {
@@ -102,10 +104,10 @@ define(["jquery", "underscore"], function ($, _) {
             now = new Date().getTime();
             newDelay = Math.max(30, 1000 / props.frameRate - (now - prevIntervalTime));
             timer = setTimeout(onInterval, newDelay);
-        }
+        };
 
         // Update interaction data.
-        function update() {
+        update = function () {
             var angle,
                 deltaY = (mouse.y && step.y) ? mouse.y - step.y : 0,
                 deltaX = (mouse.x && step.x) ? mouse.x - step.x : 0;
@@ -137,20 +139,20 @@ define(["jquery", "underscore"], function ($, _) {
                 y: mouse.y - interaction.start.y
             };
 
-        }
+        };
 
         // Simple trigger event helper.
-        function trigger(type) {
+        trigger = function (type) {
             $(interaction.target).trigger({
                 type: type,
                 interaction: interaction
             });
-        }
+        };
 
         return _.extend(consts, {
             initialize: initialize
         });
-    };
+    }
 
     return InteractionConverter;
 });

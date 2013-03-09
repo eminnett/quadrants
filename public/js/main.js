@@ -1,4 +1,4 @@
-//Configure Require with shims and vendor script paths.
+// Configure Require with shims and vendor script paths.
 require.config({
     shim: {
         "underscore": {
@@ -21,7 +21,7 @@ require.config({
 
 });
 
-//Initialize the quadrants app.
+// Initialize the quadrants app.
 require(["quadrants"], function (Q) {
     "use strict";
     Q.initialize();
