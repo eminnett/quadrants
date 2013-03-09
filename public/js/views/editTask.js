@@ -1,8 +1,11 @@
 define([
+    "jquery",
+    "underscore",
     "backbone",
     "models/task",
     "helpers/templates"
-], function(Backbone, TaskModel, TemplateHelper){
+], function ($, _, Backbone, TaskModel, TemplateHelper) {
+    "use strict";
 
     var EditTaskView = Backbone.View.extend({
             NEW_TASK: "NEW_TASK",
@@ -20,91 +23,95 @@ define([
                 "click .button.cancel": "deleteTask",
                 "click .mask": "cancelEdit"
             },
-            initialize: function(){
+            initialize: function () {
                 _.bindAll(this, "afterOpenModal", "afterCloseModal");
                 return this;
             },
-            render: function(task){
+            render: function (task) {
                 var isNew = task === undefined;
                 this.task = isNew ? new TaskModel() : task;
-                this.$el.html( TemplateHelper.populateEditTaskTemplate(isNew, this.task) );
+                this.$el.html(TemplateHelper.populateEditTaskTemplate(isNew, this.task));
                 this.openModal();
-                if( isNew )
+                if (isNew) {
                     this.trigger(this.NEW_TASK, {model: this.task});
+                }
                 return this;
             },
             // Open the modal window.
-            openModal: function(){
+            openModal: function () {
                 this.$el.removeClass("is-hidden").hide().fadeIn(this.afterOpenModal);
             },
             // Close the modal window.
-            closeModal: function(){
+            closeModal: function () {
                 this.$el.fadeOut(this.afterCloseModal);
             },
             // Adjust the element style after the modal opens.
-            afterOpenModal: function(){
+            afterOpenModal: function () {
                 this.$el.css({"display": ""});
             },
             // Adjust the element style and state after the modal closes.
-            afterCloseModal: function(){
+            afterCloseModal: function () {
                 this.$el.addClass("is-hidden").css({"display": ""});
             },
             // Cancels the creation of a new task.
-            cancelEdit: function(){
+            cancelEdit: function () {
                 this.closeModal();
                 this.trigger(this.CANCEL_EDIT, {model: this.task});
                 return this;
             },
-            toggleCritical: function(e){
+            toggleCritical: function (e) {
                 var target = $(e.target);
-                if(target.val() === "0") {
+                if (target.val() === "0") {
                     this.$el.find(".status-icon.critical").removeClass("is-hidden");
                 } else {
                     this.$el.find(".status-icon.critical").removeClass("is-selected").addClass("is-hidden");
                 }
-                
+
                 return this;
             },
-            changeStatus: function(e){
+            changeStatus: function (e) {
                 var target = $(e.target);
-                if(target.hasClass("is-selected") && target.hasClass("none"))
+                if (target.hasClass("is-selected") && target.hasClass("none")) {
                     return this;
+                }
 
-                if(target.hasClass("is-exclusive")){
-                    if(target.hasClass("is-selected"))
+                if (target.hasClass("is-exclusive")) {
+                    if (target.hasClass("is-selected")) {
                         target.siblings(".none").addClass("is-selected");
-                    else
+                    } else {
                         target.siblings(".is-selected.is-exclusive").removeClass("is-selected");
+                    }
                 }
                 target.toggleClass("is-selected");
-                
+
                 return this;
             },
             // The modified properties of the task are submitted to the model on save. This allows
             // for the user to effectively cancel the changes by closing the task editor.
-            saveTask: function(){
-                this.task.set( this.getProps() );
+            saveTask: function () {
+                this.task.set(this.getProps());
                 this.task.save();
                 this.closeModal();
                 this.trigger(this.SAVE_TASK, {model: this.task});
                 return this;
             },
-            toggleArchive: function(){
+            toggleArchive: function () {
                 var archivalButton = this.$(".button.archive, .button.unarchive");
                 archivalButton.toggleClass("unarchive").toggleClass("archive");
-                if(archivalButton.hasClass("unarchive"))
+                if (archivalButton.hasClass("unarchive")) {
                     archivalButton.text("Unarchive");
-                else
+                } else {
                     archivalButton.text("Archive");
+                }
                 return this;
             },
-            deleteTask: function(){
+            deleteTask: function () {
                 this.closeModal();
                 this.trigger(this.DELETE_TASK, {model: this.task});
                 return this;
             },
             // Retrieves the task properties from the markup and sets null values to ''.
-            getProps: function(){
+            getProps: function () {
                 var props = {
                         "title": this.$("#edit-task-title").val(),
                         "priority": parseInt(this.$("#edit-task-priority").val(), 10),
@@ -114,8 +121,8 @@ define([
                         "archived": this.$(".button.archive, .button.unarchive").hasClass("unarchive")
                     };
 
-                _.each(props, function(v, k){
-                    if(!v) props[k] = '';
+                _.each(props, function (v, k) {
+                    if (!v) { props[k] = ''; }
                 });
 
                 return props;

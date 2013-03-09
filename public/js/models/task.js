@@ -1,4 +1,6 @@
-define(["backbone"], function(Backbone) {
+define(["underscore", "backbone"], function (_, Backbone) {
+    "use strict";
+
     var TaskModel = Backbone.Model.extend({
         url: "/task",
         defaults : {
@@ -12,18 +14,19 @@ define(["backbone"], function(Backbone) {
             archived: false
         },
         // Parses the OID string from MongoDB.
-        parse: function(response){
-            if(_.isString(response))
+        parse: function (response) {
+            if (_.isString(response)) {
                 response = JSON.parse(response);
+            }
             response.id = response._id.$oid;
             return response;
         },
-        validate: function(attributes){
-            if(_.isString(attributes.priority))
+        validate: function (attributes) {
+            if (_.isString(attributes.priority)) {
                 this.set("priority", parseInt(attributes.priority, 10));
+            }
         }
     });
 
     return TaskModel;
-
 });

@@ -22,6 +22,7 @@ require.config({
 });
 
 //Initialize the quadrants app.
-require(["quadrants"], function(Q){
+require(["quadrants"], function (Q) {
+    "use strict";
     Q.initialize();
 });

@@ -1,4 +1,5 @@
-define(["backbone"], function(Backbone) {
+define(["backbone"], function (Backbone) {
+    "use strict";
     var AppRouter = Backbone.Router.extend({
         routes: {
             'tasks/toggle-filter/:type': 'filterTasks',

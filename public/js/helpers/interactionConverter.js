@@ -3,12 +3,13 @@
 //
 // ToDo: Implement double tap.
 // ToDo: Implement long press.
-define(["jquery", "underscore"], function($, _){
+define(["jquery", "underscore"], function ($, _) {
+    "use strict";
 
     var InteractionConverter;
 
-    InteractionConverter = function(){
-        var publicMethods, props, dragStarted, timer, startTime,
+    InteractionConverter = function () {
+        var props, dragStarted, timer, startTime,
             prevIntervalTime, mouse, step, interaction,
             consts = {
                 TAP: "ic_tap",
@@ -19,11 +20,7 @@ define(["jquery", "underscore"], function($, _){
                 DRAG_END: "ic_drag_end"
             };
 
-        publicProps = _.extend( consts, {
-            initialize: initialize
-        });
-
-        function initialize(){
+        function initialize() {
             props = {
                 frameRate: 50,          // frames/second
                 maxTapDuration: 50,     // miliseconds
@@ -33,9 +30,9 @@ define(["jquery", "underscore"], function($, _){
             reset();
             regListeners();
         }
-        
+
         // Reset the interaction data to null states.
-        function reset(){
+        function reset() {
             dragStarted = false;
             timer = null;
             startTime = null;
@@ -48,41 +45,42 @@ define(["jquery", "underscore"], function($, _){
                 direction: null,
                 start: {},
                 pos: {},
-                distance:{},
+                distance: {},
                 target: null
             };
         }
-        
-        function regListeners(){
+
+        function regListeners() {
             $(document).on("mousedown", onMouseDown);
             $(document).on("mouseup", onMouseUp);
         }
-        
-        function onMouseDown(e){
+
+        function onMouseDown(e) {
             $(document).on("mousemove", onMouseMove);
             start(e); //double tap will have to be taken into account.
         }
-        
-        function onMouseUp(e){
+
+        function onMouseUp() {
             $(document).off("mousemove", onMouseMove);
             clearTimeout(timer);
-            
-            if(step === interaction.start && !dragStarted)
+
+            if (step === interaction.start && !dragStarted) {
                 trigger(consts.TAP);
-            else
+            } else {
                 trigger(consts.DRAG_END);
+            }
 
             reset();
         }
-        
+
         // Record the mouse position.
-        function onMouseMove(e){
+        function onMouseMove(e) {
             mouse.x = e.pageX;
             mouse.y = e.pageY;
         }
-        
+
         // Begin the interaction and initialize the interaction data.
-        function start(e){
+        function start(e) {
             interaction.target = e.target;
             interaction.start.x = e.pageX;
             interaction.start.y = e.pageY;
@@ -94,34 +92,36 @@ define(["jquery", "underscore"], function($, _){
         }
 
         // Handle the frame interval.
-        function onInterval(){
+        function onInterval() {
             var now, newDelay;
             update();
-            if(!_.isUndefined(interaction.angle)){
+            if (!_.isUndefined(interaction.angle)) {
                 trigger(consts.DRAG);
             }
 
-            now = new Date().getTime(),
+            now = new Date().getTime();
             newDelay = Math.max(30, 1000 / props.frameRate - (now - prevIntervalTime));
             timer = setTimeout(onInterval, newDelay);
         }
 
         // Update interaction data.
-        function update(){
-            var deltaY = (mouse.y && step.y) ? mouse.y - step.y : 0,
+        function update() {
+            var angle,
+                deltaY = (mouse.y && step.y) ? mouse.y - step.y : 0,
                 deltaX = (mouse.x && step.x) ? mouse.x - step.x : 0;
             interaction.duration = new Date().getTime() - startTime;
-            if( _.any([deltaY, deltaX])) {
-                var angle = interaction.angle = Math.atan2( deltaY, deltaX ) * 180 / Math.PI;
-                if(angle > -135 && angle < -45 )
+            if (_.any([deltaY, deltaX])) {
+                angle = interaction.angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+                if (angle > -135 && angle < -45) {
                     interaction.direction = "up";
-                else if(angle > -45 && angle < 45)
+                } else if (angle > -45 && angle < 45) {
                     interaction.direction = "right";
-                else if(angle > 45 && angle < 135)
+                } else if (angle > 45 && angle < 135) {
                     interaction.direction = "down";
-                else
+                } else {
                     interaction.direction = "left";
-                if(step === interaction.start && !dragStarted){
+                }
+                if (step === interaction.start && !dragStarted) {
                     dragStarted = true;
                     trigger(consts.DRAG_START);
                 }
@@ -130,13 +130,13 @@ define(["jquery", "underscore"], function($, _){
                 interaction.angle = undefined;
                 interaction.direction = undefined;
             }
-            
+
             interaction.pos = mouse;
             interaction.distance = {
                 x: mouse.x - interaction.start.x,
                 y: mouse.y - interaction.start.y
             };
-            
+
         }
 
         // Simple trigger event helper.
@@ -147,7 +147,9 @@ define(["jquery", "underscore"], function($, _){
             });
         }
 
-        return publicProps;
+        return _.extend(consts, {
+            initialize: initialize
+        });
     };
 
     return InteractionConverter;

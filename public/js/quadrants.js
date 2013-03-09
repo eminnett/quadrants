@@ -1,7 +1,7 @@
 // The core Quadrants application object.
 //
 // ToDo: Animate task position changes (buggy on first attempt); *
-// ToDo: Cleanup and comment code. *
+// ToDo: Comment code. *
 // ToDo: Package for GitHub. ^ *
 // ToDo: Put on server. ^ *
 // ToDo: Set up deployment process. ^ *
@@ -16,6 +16,7 @@
 // ToDo: Make wishlist for next round of development.
 define([
     "jquery",
+    "underscore",
     "backbone",
     "router",
     "managers/userInteraction",
@@ -24,8 +25,9 @@ define([
     "views/taskList",
     "views/task",
     "helpers/drag"
-], function($, Backbone, Router, InteractionManager, TasksCollection,
-        EditTaskView, TaskListView, TaskView, dragHelper){
+], function ($, _, Backbone, Router, InteractionManager, TasksCollection,
+        EditTaskView, TaskListView, TaskView, dragHelper) {
+    "use strict";
 
     var router, interactionManager, tasksCollection,
         editTaskView, taskLists, taskViews;
@@ -68,15 +70,15 @@ define([
     }
 
     function regJQListeners() {
-        $("body").on("click", ".backbone-action", function(e){
+        $("body").on("click", ".backbone-action", function (e) {
             e.preventDefault();
-            router.navigate( '/', {trigger: true} );
-            router.navigate( $(this).attr("href"), {trigger: true} );
+            router.navigate('/', {trigger: true});
+            router.navigate($(this).attr("href"), {trigger: true});
         });
 
-        $("body").on("click", ".button.add", function(e){
+        $("body").on("click", ".button.add", function (e) {
             e.preventDefault();
-            router.navigate( 'task/new', {trigger: true} );
+            router.navigate('task/new', {trigger: true});
         });
     }
 
@@ -85,16 +87,16 @@ define([
         router.on('route:sortTasks', sortTasks);
         router.on('route:newTask', populateEditView);
 
-        router.on('route:unhandledRoute', function(route){
-            if(route !== '/' && route.length > 0){
-                // console.log("'" + route + "' is not a recognized request.");
-            }
-        });
+        // router.on('route:unhandledRoute', function (route) {
+        //     if (route !== '/' && route.length > 0) {
+        //         // console.log("'" + route + "' is not a recognized request.");
+        //     }
+        // });
     }
 
     function regCollectionListeners() {
-        tasksCollection.on('reset', function(e){
-            _.each(e.models, function(model){
+        tasksCollection.on('reset', function (e) {
+            _.each(e.models, function (model) {
                 var taskList,
                     taskView = new TaskView({model: model}),
                     order = model.get("order"),
@@ -106,7 +108,7 @@ define([
                 taskList = _.where(taskLists, {priority: priority})[0];
                 taskList.view.insert(taskView, order, insertOptions);
             });
-            _.each(taskLists, function(taskList){
+            _.each(taskLists, function (taskList) {
                 taskList.view.fixOrder();
             });
         });
@@ -120,7 +122,7 @@ define([
     }
 
     function regTaskListeners(taskView) {
-        taskView.on(interactionManager.TAP, function(e){
+        taskView.on(interactionManager.TAP, function (e) {
             populateEditView(e.view.model);
         });
         taskView.on(interactionManager.DRAG_START, onTaskDragStart);
@@ -133,8 +135,8 @@ define([
     // Sinatra, the router will navigate to the route.
     function navigateToInitialRoute() {
         var initialRoute = $.trim($("#route").attr("data-route"));
-        if(initialRoute.length > 0 && initialRoute !== '/'){
-            router.navigate( '/' + $("#route").attr("data-route") );
+        if (initialRoute.length > 0 && initialRoute !== '/') {
+            router.navigate('/' + $("#route").attr("data-route"));
         }
     }
 
@@ -147,19 +149,19 @@ define([
             targetFilter = filterIcons.filter("." + type);
         targetFilter.toggleClass("is-selected");
 
-        if(type === "archived"){
+        if (type === "archived") {
             filterIcons.filter(".unarchived").removeClass("is-selected");
-        }else if(type === "unarchived"){
+        } else if (type === "unarchived") {
             filterIcons.filter(".archived").removeClass("is-selected");
         }
 
         selectedFilterIcons = filterIcons.filter(".is-selected");
 
-        selectedFilterIcons.each(function(i, filterIcon){
+        selectedFilterIcons.each(function (i, filterIcon) {
             selectedFilters.push($(filterIcon).attr("data-filter"));
         });
 
-        _.each(taskLists, function(taskList){
+        _.each(taskLists, function (taskList) {
             taskList.view.filterTasks(selectedFilters);
         });
     }
@@ -168,13 +170,13 @@ define([
     //
     // ToDo: Sort by date once date support has been added.
     function sortTasks(type) {
-        _.each(taskLists, function(taskList){
+        _.each(taskLists, function (taskList) {
             taskList.view.sortTasks(type);
         });
     }
 
     function populateEditView(task) {
-        if(!_.isUndefined(task)){
+        if (!_.isUndefined(task)) {
             interactionManager.resetInteraction(taskViews[task.cid], {silent: true});
         }
         editTaskView.render(task);
@@ -189,7 +191,7 @@ define([
     }
 
     // Handle saving a task.
-    function onSave(e){
+    function onSave(e) {
         var task = e.model,
             quadrant = parseInt(task.get("priority"), 10),
             taskView = taskViews[task.cid];
@@ -197,17 +199,17 @@ define([
     }
 
     // Handle deleting a task.
-    function onDelete(e){
+    function onDelete(e) {
         var task = e.model,
             taskView = taskViews[task.cid];
         interactionManager.unregisterView(taskView);
         delete taskViews[task.cid];
         taskView.remove();
-        task.destroy({url: task.url+"/"+task.id});
+        task.destroy({url: task.url + "/" + task.id});
     }
 
     // Handle starting to drag a task.
-    function onTaskDragStart(e){
+    function onTaskDragStart(e) {
         var taskView = e.view,
             priority = parseInt(taskView.model.get("priority"), 10),
             taskList = _.where(taskLists, {priority: priority})[0];
@@ -215,17 +217,17 @@ define([
     }
 
     // Handle dragging a task.
-    function onTaskDrag(e){
-        function handleQuadrantClass(targetQuadrant){
-            if(!targetQuadrant.hasClass("drop-target")){
+    function onTaskDrag(e) {
+        function handleQuadrantClass(targetQuadrant) {
+            if (!targetQuadrant.hasClass("drop-target")) {
                 $(".quadrant.drop-target").removeClass("drop-target");
                 targetQuadrant.addClass("drop-target");
             }
         }
 
-        function resetTaskListSpaces(priority){
-            _.each(taskLists, function(taskList){
-                if(_.isUndefined(priority) || priority !== taskList.priority){
+        function resetTaskListSpaces(priority) {
+            _.each(taskLists, function (taskList) {
+                if (_.isUndefined(priority) || priority !== taskList.priority) {
                     taskList.view.removeSpace();
                 }
             });
@@ -236,30 +238,30 @@ define([
             taskView = e.view;
 
         //if (taskView.$el.hasClass("is-dragging")) { //class not working as expected yet
-            targetQuadrant = dragHelper.getQuadrantAtPoint(e.pos.x, e.pos.y);
-            if(targetQuadrant.length > 0) {
-                priority = parseInt(targetQuadrant.attr("data-priority"), 10);
-                dTaskBoundary = dragHelper.getBoundary(taskView.$el);
-                taskHeight = dTaskBoundary.bottom - dTaskBoundary.top;
-                taskList = _.where(taskLists, {priority: priority})[0];
+        targetQuadrant = dragHelper.getQuadrantAtPoint(e.pos.x, e.pos.y);
+        if (targetQuadrant.length > 0) {
+            priority = parseInt(targetQuadrant.attr("data-priority"), 10);
+            dTaskBoundary = dragHelper.getBoundary(taskView.$el);
+            taskHeight = dTaskBoundary.bottom - dTaskBoundary.top;
+            taskList = _.where(taskLists, {priority: priority})[0];
 
-                handleQuadrantClass(targetQuadrant);
+            handleQuadrantClass(targetQuadrant);
 
-                _.each(taskList.view.tasks, function(iterTask){
-                    var tTaskBoundary = dragHelper.getBoundary(iterTask.$el);
-                    if( dragHelper.boundariesIntersect(dTaskBoundary, tTaskBoundary) ) {
-                        if( dTaskBoundary.top < tTaskBoundary.top ) {
-                            taskList.view.makeSpaceAt(iterTask.model.get("order"));
-                        } else {
-                            taskList.view.makeSpaceAt(iterTask.model.get("order") + 1);
-                        }
+            _.each(taskList.view.tasks, function (iterTask) {
+                var tTaskBoundary = dragHelper.getBoundary(iterTask.$el);
+                if (dragHelper.boundariesIntersect(dTaskBoundary, tTaskBoundary)) {
+                    if (dTaskBoundary.top < tTaskBoundary.top) {
+                        taskList.view.makeSpaceAt(iterTask.model.get("order"));
+                    } else {
+                        taskList.view.makeSpaceAt(iterTask.model.get("order") + 1);
                     }
-                });
-                resetTaskListSpaces(priority);
-            } else {
-                resetTaskListSpaces();
-                $(".quadrant.drop-target").removeClass("drop-target");
-            }
+                }
+            });
+            resetTaskListSpaces(priority);
+        } else {
+            resetTaskListSpaces();
+            $(".quadrant.drop-target").removeClass("drop-target");
+        }
         //}
     }
 
@@ -267,15 +269,15 @@ define([
     function onTaskDrop(e) {
         var priority, dropTarget,
             task = e.view.model,
-            dropElement = document.elementFromPoint( e.pos.x, e.pos.y ),
+            dropElement = document.elementFromPoint(e.pos.x, e.pos.y),
             targetQuadrant = $(dropElement).parents(".quadrant");
 
-        if(targetQuadrant.length > 0) {
+        if (targetQuadrant.length > 0) {
             priority = parseInt(targetQuadrant.attr("data-priority"), 10);
             dropTarget = _.where(taskLists, {priority: priority})[0].view;
             targetQuadrant.removeClass("drop-target");
             task.set("priority", priority);
-            if( priority !== 0){
+            if (priority !== 0) {
                 task.set("critical", false);
             }
         } else {

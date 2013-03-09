@@ -1,19 +1,15 @@
 //Helper functions related to dragging.
-define([], function(){
-    var publicProps = {
-            getQuadrantAtPoint: getQuadrantAtPoint,
-            getBoundary: getBoundary,
-            boundariesIntersect: boundariesIntersect
-        };
+define(["jquery"], function ($) {
+    "use strict";
 
     // Returns the jQuery wrapper for a quadrant
     // element at a given set of coordiantes.
     function getQuadrantAtPoint(x, y) {
-        var offset, boundary,
+        var boundary,
             quadrant = $();
-        $(".quadrant").each(function(){
+        $(".quadrant").each(function () {
             boundary = getBoundary($(this));
-            if( isInsideBoundary(boundary, x, y) ) {
+            if (isInsideBoundary(boundary, x, y)) {
                 quadrant = $(this);
                 return false;
             }
@@ -38,7 +34,7 @@ define([], function(){
         return o.x > 0 && o.y > 0;
     }
 
-    // Returns the amount of overlap between two 
+    // Returns the amount of overlap between two
     // boundaries. Negative values imply no overlap.
     function overlap(b1, b2) {
         return {
@@ -52,5 +48,9 @@ define([], function(){
         return b.left < x && x < b.right && b.top < y && y < b.bottom;
     }
 
-    return publicProps;
+    return {
+        getQuadrantAtPoint: getQuadrantAtPoint,
+        getBoundary: getBoundary,
+        boundariesIntersect: boundariesIntersect
+    };
 });
