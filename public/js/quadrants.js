@@ -1,18 +1,4 @@
 // The core Quadrants application object.
-//
-// ToDo: Package for GitHub. ^ *
-// ToDo: Put on server. ^ *
-// ToDo: Set up deployment process. ^ *
-// ToDo: Animate task position changes (buggy on first attempt);
-// ToDo: Add multi-touch support.
-// ToDo: Create a global event dispatcher in order to clean up event dispatching across the app.
-//      (Is this needed?)
-// ToDo: Add date support.
-// ToDo: Create (or at least begin creating) a responsive layout.
-// ToDo: Develop the ability to resize quadrants
-//      (this will be best combined with a responsive layout).
-// ToDo: Test.
-// ToDo: Make wishlist for next round of development.
 define([
     "jquery",
     "underscore",
