@@ -4,7 +4,7 @@ Quadrants Task Manager
 Quadrants is an in development project by Edward Minnett.
 
 
-Suported Environments
+Supported Environments
 ---------------------
 * Latest Chrome on OSX.
 * (I'm sure others work, but I haven't tested any yet.)
