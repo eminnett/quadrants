@@ -4,6 +4,19 @@ Quadrants Task Manager
 Quadrants is an in development project by Edward Minnett.
 
 
+Suported Environments
+---------------------
+* Latest Chrome on OSX.
+* (I'm sure others work, but I haven't tested any yet.)
+
+
+Requirements
+------------
+
+* Latest version of Ruby.
+* MongoDB with the default settings.
+
+
 Tasks
 -----
 
