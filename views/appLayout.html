@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible'>
+    <meta content='width=device-width,initial-scale=1' name='viewport'>
+    <title>
+      Quadrants
+    </title>
+    <link href='/imgs/favicon.png' rel='icon' type='image/png'>
+    <link href='/css/quadrants.css' rel='stylesheet' type='text/css'>
+    <script data-main='js/main' src='/js/libs/require.js'></script>
+  </head>
+  <body class='is-not-selectable'>
+    <header>
+      <div class='logo is-not-selectable'>
+        Quadrants
+      </div>
+      <div class='view-options-wrapper'>
+        <span class='label is-not-selectable'>
+          Filters:
+        </span>
+        <div class='filters'>
+          <a class='filter backbone-action' href='tasks/toggle-filter/none'>
+            <span class='status-icon is-interactive none' data-filter='none'></span>
+          </a>
+          <a class='filter backbone-action' href='tasks/toggle-filter/pending'>
+            <span class='status-icon is-interactive pending' data-filter='pending'></span>
+          </a>
+          <a class='filter backbone-action' href='tasks/toggle-filter/started'>
+            <span class='status-icon is-interactive started' data-filter='started'></span>
+          </a>
+          <a class='filter backbone-action' href='tasks/toggle-filter/complete'>
+            <span class='status-icon is-interactive complete' data-filter='complete'></span>
+          </a>
+          <a class='filter backbone-action' href='tasks/toggle-filter/critical'>
+            <span class='status-icon is-interactive critical' data-filter='critical'></span>
+          </a>
+          <a class='filter backbone-action' href='tasks/toggle-filter/archived'>
+            <span class='status-icon is-interactive archived' data-filter='archived'></span>
+          </a>
+          <a class='filter backbone-action' href='tasks/toggle-filter/unarchived'>
+            <span class='status-icon is-interactive unarchived' data-filter='unarchived'></span>
+          </a>
+        </div>
+      </div>
+      <div class='view-options-wrapper'>
+        <span class='label is-not-selectable'>
+          Sort by:
+        </span>
+        <div class='sort-options'>
+          <a class='sort-option backbone-action' href='tasks/sort/status'>
+            status
+          </a>
+          <span class='delimiter is-not-selectable'>
+            |
+          </span>
+          <a class='sort-option backbone-action' href='tasks/sort/title'>
+            title
+          </a>
+        </div>
+      </div>
+      <div class='button has-label is-interactive add'>
+        New task
+      </div>
+    </header>
+    <div class='quadrants'>
+      <div class='half top'>
+        <div class='quadrant left' data-priority='0'>
+          <div class='quadrant-label left'>
+            <div class='text'>
+              Important
+            </div>
+          </div>
+          <div class='quadrant-label top'>
+            <div class='text'>
+              Urgent
+            </div>
+          </div>
+        </div>
+        <div class='vertical-divider divider'>
+          <div class='drag-affordance one-dimension'></div>
+        </div>
+        <div class='quadrant right' data-priority='1'>
+          <div class='quadrant-label top'>
+            <div class='text'>
+              Not&nbsp;Urgent
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='horizontal-dividers'>
+        <div class='horizontal-divider divider'>
+          <div class='drag-affordance one-dimension'></div>
+        </div>
+        <div class='drag-affordance two-dimensions' id='resize-handle'></div>
+        <div class='horizontal-divider divider right'>
+          <div class='drag-affordance one-dimension'></div>
+        </div>
+      </div>
+      <div class='half bottom'>
+        <div class='quadrant left' data-priority='2'>
+          <div class='quadrant-label left'>
+            <div class='text'>
+              Not&nbsp;Important
+            </div>
+          </div>
+        </div>
+        <div class='vertical-divider divider'>
+          <div class='drag-affordance one-dimension'></div>
+        </div>
+        <div class='quadrant right' data-priority='3'></div>
+      </div>
+    </div>
+    <footer>
+      &copy; 2013 EJM
+    </footer>
+    <div id='route'></div>
+  </body>
+</html>
